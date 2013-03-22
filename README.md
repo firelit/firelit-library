@@ -14,9 +14,36 @@ Classes Included
 
 ### HttpRequest
 
+### LogIt 
+
+An application logging class for recording errors, events or other useful data to either a database table or a file.
+
+Example usage:
+```php
+new Firelit\LogIt(5, 'The website is going down!', __FILE__, __LINE__);
+```
+
+Please remember to restrict access (eg, via .htaccess) to any files you may be using for logging.
+
 ### Query
 
 ### Session
+
+Session management class which can use PHP's native session features or a database.
+
+Note that if you are using PHP's native session support, the expiration of a session is controlled by the `session.gc_maxlifetime` parameter.
+
+Example usage:
+```php
+$sess = new Session();
+
+$sess->loggedIn = true;
+$sess->userName = 'Peter';
+
+echo '<p>Hello '. $sess->userName .'</p>';
+
+$sess->destroy();
+```
 
 ### User
 

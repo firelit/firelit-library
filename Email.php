@@ -1,6 +1,8 @@
 <?PHP
 
-namespace 'Fireit';
+namespace 'Firelit';
+
+include_once('library.php');
 
 class Email {
 	

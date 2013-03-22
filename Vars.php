@@ -1,6 +1,8 @@
 <?PHP
 
-namespace 'Fireit';
+namespace 'Firelit';
+
+include_once('library.php');
 
 class Vars {
 	
@@ -18,6 +20,7 @@ class Vars {
 				return false;
 		} else
 			return false;
+			
 	}
 	
 	static function set($name, $value, $acct = 0) {
@@ -59,6 +62,7 @@ class Vars {
 		}
 	
 		return $res;
+		
 	}
 	
 	static function inc($name, $amt = 1, $acct = 0) {
@@ -88,6 +92,7 @@ class Vars {
 				return false; // There were too many tries
 			}
 		}
+		
 	}
 
 }

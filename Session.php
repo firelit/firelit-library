@@ -1,157 +1,158 @@
 <?PHP
 
-namespace 'Fireit';
+namespace 'Firelit';
+
+if (!defined('FIRELIT_SESSION_SID_LEN')) define('FIRELIT_SESSION_SID_LEN', 32); // Length of the session key
+if (!defined('FIRELIT_SESSION_DAYS_EXPIRE')) define('FIRELIT_SESSION_DAYS_EXPIRE', 7); // How many days after the session key expires (must be int, use php.ini to enforce with PHP session use)
+if (!defined('FIRELIT_SESSION_KEY_NAME')) define('FIRELIT_SESSION_KEY_NAME', 'firelit-sid'); // Name of the session key (eg, cookie name)
+if (!defined('FIRELIT_SESSION_USE_DB')) define('FIRELIT_SESSION_USE_DB', false); // Use the database for session management (else use PHP sessions)
+
+include_once('library.php');
 
 class Session {
-	public static $instance = false;
+	
 	public $SID = false;
-	public $data = false;
-	public $loggedIn = false;
-	public $user = false;
-	public $userData = false;
 	
-	private function __construct() {	}
-	
-	public static function retrieve() {
-		if (self::$instance) return self::$instance;
+	private function __construct() {	
 		
-		$class = __CLASS__;
-		self::$instance = new Firelit\$class;
-		self::$instance->getSessionId();
-		return self::$instance;
-	}
-	
-	function getSessionId() {
-		if (isset($_REQUEST["sid"]) && (strlen($_REQUEST["sid"]) == SID_KEY_LEN)) {
-			// Key sent
-			$sid = $_REQUEST["sid"];
+		$sid = false;
+		
+		if (isset($_REQUEST[FIRELIT_SESSION_KEY_NAME]) && (strlen($_REQUEST[FIRELIT_SESSION_KEY_NAME]) == FIRELIT_SESSION_SID_LEN)) {
+			// Key available
+			
+			// Sanitize key
+			$sid = $_REQUEST[FIRELIT_SESSION_KEY_NAME];
 			cleanUTF8($sid, false);
 			$sid = preg_replace('/[^0-9A-Za-z]+/', '', $sid);
-			if (strlen($sid) == SID_KEY_LEN)
-				return $this->SID = $sid;
-			else {
-				// Invalid key length, regenerate
-				if (headers_sent()) return false;
-				$this->SID = createKey(SID_KEY_LEN);
-				setcookie('sid', $this->SID, time() + 86400 * SID_EXPIRE_DAYS, '/', $_SERVER['HTTP_HOST'], SSL_INSTALLED, TRUE);
-				return $this->SID;
-			}
+			
+			if (strlen($sid) != FIRELIT_SESSION_SID_LEN)
+				$sid = false;
+			
+		}
+		
+		if (!$sid) {
+			// No key, generate
+			
+			if (headers_sent()) return false; // Can't help now
+			
+			$sid = createKey(FIRELIT_SESSION_SID_LEN);
+			
+			$expire = time() + ( 86400 * FIRELIT_SESSION_DAYS_EXPIRE );
+			
+			// cookie_name, cookie_value, expire_time, path, host, ssl_only, no_js_access
+			setcookie(FIRELIT_SESSION_KEY_NAME, $sid, $expire, '/', $_SERVER['HTTP_HOST'], SSL_INSTALLED, TRUE);
+			
+		}
+		
+		if (!FIRELIT_SESSION_USE_DB) {
+			// Use PHP's session handling
+			
+			session_id($sid);
+			session_start();
+			
+		}
+		
+		return $this->SID = $sid;
+		
+	}
+	
+	function __get($name) {
+		
+		if (FIRELIT_SESSION_USE_DB) {
+			
+			$q = new Query();
+			$q->select('Sessions', "`sid`='". Query:asl($this->SID) ."' AND `name`='". Query::asl($name) ."' AND `expires`>NOW()", 1);
+			
+			if (!$q->success(__FILE__, __LINE__)) return null;
+			
+			if ($row = $q->getRow()) return unserialize($row['value']);
+			else return null;
+			
 		} else {
-			// No key sent, regenerate
-			if (headers_sent()) return false;
-			$this->SID = createKey(SID_KEY_LEN);
-			setcookie('sid', $this->SID, time() + 86400 * SID_EXPIRE_DAYS, '/', $_SERVER['HTTP_HOST'], SSL_INSTALLED, TRUE);
-			return $this->SID;
-		}
-	}
-	
-	function setNewKey() {
-		if (!headers_sent()) {
-			$this->SID = createKey(SID_KEY_LEN);
-			setcookie('sid', $this->SID, time() + 86400 * SID_EXPIRE_DAYS, '/', $_SERVER['HTTP_HOST'], SSL_INSTALLED, TRUE);
-		} else logIt('. Error setting new key, headers already sent', __FILE__, __LINE__);
-	}
-	
-	function getData($flushCache = false) {
-		if ($this->data && !$flushCache) return $this->data;
-		
-		$sql = "SELECT * FROM `Sessions` WHERE `key` = '". asl($this->SID). "' AND `expires` > NOW()";
-		$q = new Firelit\Query($sql);
-		
-		if ($q->checkError(__FILE__, __LINE__)) {
-			$this->data = array();
 			
-			while ($row = $q->getRow()) {
-				$this->data[$row['name']] = unserialize($row['value']);
-				if (($row['name'] == '_loggedIn')) $this->loggedIn  = unserialize($row['value']);
-				if (($row['name'] == '_user')) $this->user = unserialize($row['value']);
-			}
+			return $_SESSION[$name];
 			
-			if ($this->loggedIn && $this->user) {
-				
-				$sql = "SELECT * FROM `Users` WHERE `id`='". intval($this->user) ."' LIMIT 1";
-				$q = new Firelit\Query($sql);
-				
-				if ($q->checkError(__FILE__, __LINE__)) {
-					if ($row = $q->getRow()) {
-						$this->userData = $row;
-					} else {
-						$this->loggedIn = false;
-						$this->user = false;
-					}
-				}
-				
-			} else {
-				$this->loggedIn = false;
-				$this->user = false;
-			}
-			
-			return $this->data;
-		} else
-			return false;
-	}
-	
-	function setData($varName, $varValue, $daysExpire = SDB_EXPIRE_DAYS) {
-		// VarName truncated to 32 characters by DB
-		
-		if (is_null($varValue)) {
-			$sql = "DELETE FROM `Sessions` WHERE `key`='". asl($this->SID). "' AND `name`='". asl($varName) ."'";
-			$q = new Firelit\Query($sql);
-			$res = $q->checkError(__FILE__, __LINE__);
-			if ($res) unset($this->data[$varName]);
-			return $res;	
 		}
 		
-		if (floatval($daysExpire) < 1)
-			$expire = round(floatval($daysExpire) * 24) .' HOUR';
-		else
-			$expire = intval($daysExpire) .' DAY';
+	}
+	
+	function __set($name, $val) {
 		
-		$sql = "UPDATE `Sessions` SET `value`='". asl(serialize($varValue)) ."', `expires`=DATE_ADD(NOW(), INTERVAL ". $expire .") WHERE `key`='". asl($this->SID). "' AND `name`='". asl($varName) ."'";
-		$q = new Firelit\Query($sql);
-		$res = $q->checkError(__FILE__, __LINE__);
-		
-		if ($q->getAffected() == 0) {
-			$sql = "INSERT INTO `Sessions` (`key`, `name`, `value`, `expires`) VALUES ('". asl($this->SID). "', '". asl($varName) ."', '". asl(serialize($varValue)) ."', DATE_ADD(NOW(), INTERVAL ". $expire ."))";
-			$q = new Firelit\Query($sql);
-			$res = $q->checkError(__FILE__, __LINE__);
+		if (FIRELIT_SESSION_USE_DB) {
+			
+			$q = new Query();
+			$q->replace('Sessions', array(
+				'sid' => $this->SID,
+				'name' => $name,
+				'value' => serialize($val),
+				'expires' => array('SQL', 'DATE_ADD(NOW(), INTERVAL '. FIRELIT_SESSION_DAYS_EXPIRE .' DAY)')
+			));
+			
+			return $q->success(__FILE__, __LINE__);
+			
+		} else {
+			
+			$_SESSION[$name] = $val;
+			
+			return true;
+			
 		}
 		
-		if ($res) $this->data[$varName] = $varValue;
-		
-		return $res;
 	}
 	
-	public function logout() {
-		$this->setData('_loggedIn', null);
-		$this->setData('_user', null);
-		$this->loggedIn = false;
-		$this->user = false;
-		$this->userData = false;
+	public function destory() {
+		// Remove all data from and traces of the current session
+		
+		if (FIRELIT_SESSION_USE_DB) {
+			
+			$q = new Query();
+			$q->delete('Sessions', "`sid`='". asl($this->SID). "'");
+			
+			$res2 = self::clean();
+			
+			return ($q->success(__FILE__, __LINE__) && $res2);
+			
+		} else {
+			
+			return session_destroy();
+			
+		}
+		
 	}
 	
-	public function login($user) {
-		$user = intval($user);
-		if ($user == 0) return;
+	static function cleanExpired() {
+		// Clean out expired data
 		
-		$this->setNewKey();
-		$this->setData('_loggedIn', true);
-		$this->setData('_user', $user);
-		$this->loggedIn = true;
-		$this->user = $user;
+		// Nothing to clean!
+		if (!FIRELIT_SESSION_USE_DB) return false;
 		
-		// To load $session->userData after calling login():
-		// Set $session->data = false;
-		// And call $session->getData();
+		$q = new Query();
+		$q->delete('Sessions', "`expires` <= NOW()");
+		
+		return $q->success(__FILE__, __LINE__);
+		
 	}
 	
-	function clearData() {
-		$sql = "DELETE FROM `Sessions` WHERE `key`='". asl($this->SID). "'";
-		$q1 = new Firelit\Query($sql);
+	static public install() {
+		// One-time install
+		// Create the supporting tables in the db
 		
-		$sql = "DELETE FROM `Sessions` WHERE `expires` <= NOW()";
-		$q2 = new Firelit\Query($sql);
-	
-		return ($q1->checkError(__FILE__, __LINE__) && $q2->checkError(__FILE__, __LINE__));
+		// Nothing to install!
+		if (!FIRELIT_SESSION_USE_DB) return false;
+		
+		$sql = "CREATE TABLE IF NOT EXISTS `Sessions` (
+			  `sid` varchar(". FIRELIT_SESSION_SID_LEN .") NOT NULL,
+			  `name` varchar(32) NOT NULL,
+			  `value` longtext NOT NULL,
+			  `created` timestamp NOT NULL default CURRENT_TIMESTAMP,
+			  `expires` datetime NOT NULL,
+			  PRIMARY KEY  (`sid`,`name`)
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;";
+			
+		$q = new Query($sql);
+		
+		if (!$q->success()) 
+			throw new \Exception('Install failed!');
+			
 	}
 }

@@ -1,6 +1,8 @@
 <?PHP
 
-namespace 'Fireit';
+namespace 'Firelit';
+
+include_once('library.php');
 
 class User {
 		
@@ -89,6 +91,7 @@ class User {
 				return false; // There were too many tries
 			}
 		}
+		
 	}
 	
 }

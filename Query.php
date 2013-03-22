@@ -1,6 +1,10 @@
 <?PHP
 
-namespace 'Fireit';
+namespace 'Firelit';
+
+include_once('library.php');
+
+// TODO: Add insert, update, replace, select and delete methods/verbs
 
 class Query {
 	/* Global connection & state variables */
@@ -10,7 +14,7 @@ class Query {
 	/* Object variables */
 	private $res, $sql;
 	
-	public function __construct($sql, $database = false) {
+	public function __construct($sql = false, $database = false) {
 		// $sql can be a full SQL statement
 		// OR false if it is to be defined later
 		
@@ -23,10 +27,9 @@ class Query {
 		
 		$this->sql = $sql;
 		
-		if (!$sql)
-			$this->res = mysql_query($sql, self::$conn);
-		else
-			$this->res = false;
+		if (!$sql) $this->res = mysql_query($sql, self::$conn);
+		else $this->res = false;
+		
 	}	
 	
 	public static function connect() {
@@ -68,8 +71,8 @@ class Query {
 		return mysql_error(self::$conn);
 	}
 	
-	public function success($file, $line) {
-		if (!$this->res) logIt('! MySql error ('. $this->getError() .', '. $this->sql .')', $file, $line);
+	public function success($file = false, $line = false) {
+		if (!$this->res && $file) logIt('! MySql error ('. $this->getError() .', '. $this->sql .')', $file, $line);
 		return $this->res;
 	}
 	

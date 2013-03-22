@@ -1,9 +1,11 @@
 <?PHP
 
-namespace 'Fireit';
+namespace 'Firelit';
 
 if (!defined('CURL_USER_AGENT')) define('CURL_USER_AGENT', false);
 if (!defined('CURL_CA_INFO')) define('CURL_CA_INFO', false);
+
+include_once('library.php');
 
 class HttpRequest {
 	
