@@ -20,6 +20,8 @@ An application logging class for recording errors, events or other useful data t
 
 Example usage:
 ```php
+<?php
+
 new Firelit\LogIt(5, 'The website is going down!', __FILE__, __LINE__);
 ```
 
@@ -35,6 +37,8 @@ Note that if you are using PHP's native session support, the expiration of a ses
 
 Example usage:
 ```php
+<?php
+
 $sess = new Session();
 
 $sess->loggedIn = true;
