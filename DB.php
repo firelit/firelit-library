@@ -4,46 +4,91 @@ namespace 'Firelit';
 
 include_once('library.php');
 
-// TODO: Add insert, update, replace, select and delete methods/verbs
-
-class Query {
-	/* Global connection & state variables */
+class DB {
+	// Database connection & interaction class
+	
+	// Global connection & state variables 
 	public static $conn = false;
 	public static $database = false;
 	
-	/* Object variables */
-	private $res, $sql;
+	// Object variables
+	private $res = false, $sql;
 	
-	public function __construct($sql = false, $database = false) {
-		// $sql can be a full SQL statement
-		// OR false if it is to be defined later
-		
-		if (!function_exists('logIt')) throw new Exception('logIt() function not defined.');
-		if (!function_exists('returnErr')) throw new Exception('returnErr() function not defined.');
-		
+	public function __construct() {
+		// Connect to the database
 		if (!self::$conn) $this->connect();
-		if (!$database) $database = DB_NAME;
-		if (self::$database != $database) $this->dbSelect($database);
-		
-		$this->sql = $sql;
-		
-		if (!$sql) $this->res = mysql_query($sql, self::$conn);
-		else $this->res = false;
-		
 	}	
 	
 	public static function connect() {
-		$conn = @mysql_connect(DB_IP, DB_USER, DB_PASS);
-  	if (!$conn) returnErr(500, 'Internal Server Error #'.__LINE__);
+		
+		$dsn = 'mysql:dbname='. FIRELIT_DB_NAME .';host='. FIRELIT_DB_IP;
+		
+		try {
+			$conn = new PDO($dsn, FIRELIT_DB_USER, FIRELIT_DB_PASS);
+		} catch (PDOException $e) {
+			throw new Exception('Unable to connect to database.');
+		}
+
   	self::$conn = $conn;
   	return $conn;
+  	
 	}
 	
-	public static function dbSelect($db) {
-		$res = @mysql_select_db($db, self::$conn);
- 		if (!$res) returnErr(500, 'Internal Server Error #'.__LINE__);
- 		self::$database = $db;
- 		return $res;
+	public function query($sql) {
+		// Execute the SQL query
+		return $this->res = self::$conn->query($sql);
+	}
+	
+	public function insert($table, $array) {
+		// Preform an insert on the table
+		$sql = "INSERT INTO `". $table ."` ". self::toSQL('INSERT', $array);
+		
+		// Returns the number of affected rows
+		return self::$conn->exec($sql);
+	}
+	
+	public function replace($table, $array) {
+		// Preform an replace on the table
+		$sql = "REPLACE INTO `". $table ."` ". self::toSQL('INSERT', $array);
+		
+		// Returns the number of affected rows
+		return self::$conn->exec($sql);
+	}
+	
+	public function select($table, $where = 1, $limit = false, $range = false) {
+		// Preform an select on the table
+		$sql = "SELECT * FROM `". $table ."` WHERE ". $where;
+		if ($limit !== false) {
+			$sql .= " LIMIT ". intval($limit);
+			if ($range !== false) $sql .= ", ". intval($range);
+		}
+		
+		// Returns the result set for the query
+		return $this->res = self::$conn->query($sql);
+	}
+	
+	public function update($table, $array, $where, $limit = false, $range = false) {
+		// Preform an update on the table
+		$sql = "UPDATE `". $table ."` SET ". self::toSQL('UPDATE', $array) ." WHERE ". $where;
+		if ($limit !== false) {
+			$sql .= " LIMIT ". intval($limit);
+			if ($range !== false) $sql .= ", ". intval($range);
+		}
+		
+		// Returns the number of affected rows
+		return self::$conn->exec($sql, $array);
+	}
+	
+	public function delete($table, $where, $limit = false, $range = false) {
+		// Preform a delete on the table
+		$sql = "DELETE FROM `". $table ."` WHERE ". $where;
+		if ($limit !== false) {
+			$sql .= " LIMIT ". intval($limit);
+			if ($range !== false) $sql .= ", ". intval($range);
+		}
+		
+		// Returns the number of affected rows
+		return self::$conn->exec($sql);
 	}
 	
 	public function getRes() {
@@ -72,7 +117,7 @@ class Query {
 	}
 	
 	public function success($file = false, $line = false) {
-		if (!$this->res && $file) logIt('! MySql error ('. $this->getError() .', '. $this->sql .')', $file, $line);
+		if (!$this->res && $file) new LogIt(3, 'MySql error ('. $this->getError() .', '. $this->sql .')', $file, $line);
 		return $this->res;
 	}
 	

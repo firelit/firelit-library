@@ -8,6 +8,28 @@ Classes Included
 
 ### ApiResponse
 
+### DB
+
+A database interaction class. Makes database connection management and SQL authoring slightly easier. 
+
+Example usage:
+```php
+<?php
+
+$db = new Firelit\DB();
+$db->insert('TableName', array(
+	'name' => $name,
+	'state' => $state
+);
+
+if (!$db->success()) die('It did not work :(');
+
+$db->query("SELECT * FROM `TableName` WHERE `name`='". $db::asl($name) ."'");
+
+while ($row = $db->getRow()) 
+	echo $row['name'] .': '. $row['state'] .'<br>';
+```
+
 ### Email
 
 ### Encrypt
@@ -26,8 +48,6 @@ new Firelit\LogIt(5, 'The website is going down!', __FILE__, __LINE__);
 ```
 
 Please remember to restrict access (eg, via .htaccess) to any files you may be using for logging.
-
-### Query
 
 ### Session
 

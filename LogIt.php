@@ -23,6 +23,21 @@ class LogIt {
 	private $maxLevel = FIRELIT_LOGIT_LEVEL_MAX;
 	
 	function __construct($level = false, $entry = false, $file = false, $line = 0, $user = false) { 
+		/*
+		
+			$level : The level of criticality. Suggested scale:
+				0 = Debug - for research and debug purposes
+				1 = Notice - for auditing purposes
+				2 = Important - a log entry that is slightly more important
+				3 = Warning - something that may or may not be an error
+				4 = Error - something is wrong and needs to be checked soon
+				5 = Critical - highest level, serious error, must be addressed ASAP
+			$entry : A textual description of the issue
+			$file : The source file for the error
+			$line : The line number of the issue reporting
+			$user : The user logged in, if available
+			
+		*/
 		
 		if ($level != false) $this->now($level, $entry, $source, $user);
 		
