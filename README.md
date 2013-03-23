@@ -51,9 +51,9 @@ Please remember to restrict access (eg, via .htaccess) to any files you may be u
 
 ### Session
 
-Session management class which can use PHP's native session features or a database. You can get and set any variable name and it is dynamically saved (using magic getter and setter methods).
+Session management class which can use PHP's native session features or a database. You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods).
 
-Note that if you are using PHP's native session support, the expiration of a session is controlled by the `session.gc_maxlifetime` parameter.
+Note that if you are using PHP's native session support (which is an option), the expiration of a session is controlled by the `session.gc_maxlifetime` parameter.
 
 Example usage:
 ```php
@@ -83,18 +83,17 @@ The beauty of the auto-loader is that it will only load & parse PHP files that i
 ```php
 <?php
 
-function autoload($className)
-{
-    $className = ltrim($className, '\\');
-    $fileName  = '';
-    $namespace = '';
-    if ($lastNsPos = strrpos($className, '\\')) {
-        $namespace = substr($className, 0, $lastNsPos);
-        $className = substr($className, $lastNsPos + 1);
-        $fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
-    }
-    $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-
-    require $fileName;
+function autoload($className) {
+	$className = ltrim($className, '\\');
+	$fileName  = '';
+	$namespace = '';
+	if ($lastNsPos = strrpos($className, '\\')) {
+	  $namespace = substr($className, 0, $lastNsPos);
+	  $className = substr($className, $lastNsPos + 1);
+	  $fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+	}
+	$fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+	
+	require $fileName;
 }
 ```
