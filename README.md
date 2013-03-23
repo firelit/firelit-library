@@ -20,11 +20,11 @@ $db = new Firelit\DB();
 $db->insert('TableName', array(
 	'name' => $name,
 	'state' => $state
-);
+));
 
 if (!$db->success()) die('It did not work :(');
 
-$db->query("SELECT * FROM `TableName` WHERE `name`='". $db::asl($name) ."'");
+$db->query("SELECT * FROM `TableName` WHERE `name`=:name", array('name' => $name));
 
 while ($row = $db->getRow()) 
 	echo $row['name'] .': '. $row['state'] .'<br>';
@@ -51,7 +51,7 @@ Please remember to restrict access (eg, via .htaccess) to any files you may be u
 
 ### Session
 
-Session management class which can use PHP's native session features or a database.
+Session management class which can use PHP's native session features or a database. You can get and set any variable name and it is dynamically saved (using magic getter and setter methods).
 
 Note that if you are using PHP's native session support, the expiration of a session is controlled by the `session.gc_maxlifetime` parameter.
 
