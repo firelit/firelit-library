@@ -17,7 +17,9 @@ Example usage:
 <?php
 
 $db = new Firelit\DB();
+
 $db->insert('TableName', array(
+	/* columnName => value */
 	'name' => $name,
 	'state' => $state
 ));
