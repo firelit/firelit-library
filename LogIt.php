@@ -80,7 +80,16 @@ class LogIt {
 			'entry' => $entry,
 			'source' => $file .':'. $line,
 			'user' => ( $user ? $user : '' ),
-			'remoteip' => $_SERVER['REMOTE_ADDR']
+			'remoteip' => $_SERVER['REMOTE_ADDR'],
+			'context' => serialize(array(
+				'agent' => $_SERVER['HTTP_USER_AGENT'],
+				'ip' => $_SERVER['REMOTE_ADDR'],
+				'host' => $_SERVER['HTTP_HOST'],
+				'port' => $_SERVER['SERVER_PORT'],
+				'verb' => $_SERVER['REQUEST_METHOD'],
+				'url' => $_SERVER['REQUEST_URI'],
+				'server' => $_SERVER['SERVER_NAME']
+			))
 		));
 		
 		return $q->success();
@@ -115,6 +124,7 @@ class LogIt {
 			  `source` text NOT NULL,
 			  `user` text NOT NULL,
 			  `remoteip` tinytext NOT NULL,
+			  `context` text NOT NULL,
 			  `time` timestamp NOT NULL default CURRENT_TIMESTAMP,
 			  KEY `id` (`id`)
 			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
