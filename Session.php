@@ -2,30 +2,36 @@
 
 namespace 'Firelit';
 
-if (!defined('FIRELIT_SESSION_SID_LEN')) define('FIRELIT_SESSION_SID_LEN', 32); // Length of the session key
-if (!defined('FIRELIT_SESSION_DAYS_EXPIRE')) define('FIRELIT_SESSION_DAYS_EXPIRE', 7); // How many days after the session key expires (must be int, use php.ini to enforce with PHP session use)
-if (!defined('FIRELIT_SESSION_KEY_NAME')) define('FIRELIT_SESSION_KEY_NAME', 'firelit-sid'); // Name of the session key (eg, cookie name)
-if (!defined('FIRELIT_SESSION_USE_DB')) define('FIRELIT_SESSION_USE_DB', false); // Use the database for session management (else use PHP sessions)
-
 include_once('library.php');
 
 class Session {
 	
 	public $SID = false;
 	
-	private function __construct() {	
+	// Default values
+	public $config = array(
+		'KEY_NAME' => 'firelit-sid', // Name of the cookie stored in remote browser
+		'SID_LEN' => 32, // Length of key in charchters
+		'DAYS_EXPIRE' => 7, // How long session variables are stored locally (n/a if USE_DB is false)
+		'USE_DB' => false // Instead of native PHP session support, for multi-server environment
+	);
+	
+	private function __construct($config = false) {	
 		
+		if ($config)
+			$this->config = array_merge($this->config, $config);
+			
 		$sid = false;
 		
-		if (isset($_REQUEST[FIRELIT_SESSION_KEY_NAME]) && (strlen($_REQUEST[FIRELIT_SESSION_KEY_NAME]) == FIRELIT_SESSION_SID_LEN)) {
+		if (isset($_REQUEST[$this->config['KEY_NAME']]) && (strlen($_REQUEST[$this->config['KEY_NAME']]) == $this->config['SID_LEN'])) {
 			// Key available
 			
 			// Sanitize key
-			$sid = $_REQUEST[FIRELIT_SESSION_KEY_NAME];
+			$sid = $_REQUEST[$this->config['KEY_NAME']];
 			cleanUTF8($sid, false);
 			$sid = preg_replace('/[^0-9A-Za-z]+/', '', $sid);
 			
-			if (strlen($sid) != FIRELIT_SESSION_SID_LEN)
+			if (strlen($sid) != $this->config['SID_LEN'])
 				$sid = false;
 			
 		}
@@ -35,16 +41,16 @@ class Session {
 			
 			if (headers_sent()) return false; // Can't help now
 			
-			$sid = createKey(FIRELIT_SESSION_SID_LEN);
+			$sid = createKey($this->config['SID_LEN']);
 			
-			$expire = time() + ( 86400 * FIRELIT_SESSION_DAYS_EXPIRE );
+			$expire = time() + ( 86400 * 365 * 10 ); // 10 years from now
 			
 			// cookie_name, cookie_value, expire_time, path, host, ssl_only, no_js_access
-			setcookie(FIRELIT_SESSION_KEY_NAME, $sid, $expire, '/', $_SERVER['HTTP_HOST'], SSL_INSTALLED, TRUE);
+			setcookie($this->config['KEY_NAME'], $sid, $expire, '/', $_SERVER['HTTP_HOST'], SSL_INSTALLED, TRUE);
 			
 		}
 		
-		if (!FIRELIT_SESSION_USE_DB) {
+		if (!$this->config['USE_DB']) {
 			// Use PHP's session handling
 			
 			session_id($sid);
@@ -58,7 +64,7 @@ class Session {
 	
 	function __get($name) {
 		
-		if (FIRELIT_SESSION_USE_DB) {
+		if ($this->config['USE_DB']) {
 			
 			$q = new Query();
 			$q->select('Sessions', "`sid`='". Query:asl($this->SID) ."' AND `name`='". Query::asl($name) ."' AND `expires`>NOW()", 1);
@@ -78,14 +84,14 @@ class Session {
 	
 	function __set($name, $val) {
 		
-		if (FIRELIT_SESSION_USE_DB) {
+		if ($this->config['USE_DB']) {
 			
 			$q = new Query();
 			$q->replace('Sessions', array(
 				'sid' => $this->SID,
 				'name' => $name,
 				'value' => serialize($val),
-				'expires' => array('SQL', 'DATE_ADD(NOW(), INTERVAL '. FIRELIT_SESSION_DAYS_EXPIRE .' DAY)')
+				'expires' => array('SQL', 'DATE_ADD(NOW(), INTERVAL '. $this->config['DAYS_EXPIRE'] .' DAY)')
 			));
 			
 			return $q->success(__FILE__, __LINE__);
@@ -103,7 +109,7 @@ class Session {
 	public function destory() {
 		// Remove all data from and traces of the current session
 		
-		if (FIRELIT_SESSION_USE_DB) {
+		if ($this->config['USE_DB']) {
 			
 			$q = new Query();
 			$q->delete('Sessions', "`sid`='". asl($this->SID). "'");
@@ -124,7 +130,7 @@ class Session {
 		// Clean out expired data
 		
 		// Nothing to clean!
-		if (!FIRELIT_SESSION_USE_DB) return false;
+		if (!$this->config['USE_DB']) return false;
 		
 		$q = new Query();
 		$q->delete('Sessions', "`expires` <= NOW()");
@@ -138,10 +144,10 @@ class Session {
 		// Create the supporting tables in the db
 		
 		// Nothing to install!
-		if (!FIRELIT_SESSION_USE_DB) return false;
+		if (!$this->config['USE_DB']) return false;
 		
 		$sql = "CREATE TABLE IF NOT EXISTS `Sessions` (
-			  `sid` varchar(". FIRELIT_SESSION_SID_LEN .") NOT NULL,
+			  `sid` varchar(". $this->config['SID_LEN'] .") NOT NULL,
 			  `name` varchar(32) NOT NULL,
 			  `value` longtext NOT NULL,
 			  `created` timestamp NOT NULL default CURRENT_TIMESTAMP,

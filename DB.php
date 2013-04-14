@@ -22,12 +22,12 @@ class DB {
 		if (!self::$conn) $this->connect();
 	}	
 	
-	public static function connect() {
+	public static function connect($config) {
 		
-		$dsn = 'mysql:dbname='. FIRELIT_DB_NAME .';host='. FIRELIT_DB_IP;
+		$dsn = 'mysql:dbname='. $config['DB_NAME'] .';host='. $config['DB_IP'];
 		
 		try {
-			self::$conn = new PDO($dsn, FIRELIT_DB_USER, FIRELIT_DB_PASS);
+			self::$conn = new PDO($dsn, $config['DB_USER'], $config['DB_PASS']);
 		} catch (PDOException $e) {
 			throw new Exception('Unable to connect to database.');
 		}
