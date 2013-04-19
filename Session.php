@@ -147,15 +147,16 @@ class Session {
 		
 		// Nothing to install!
 		if (!$this->config['USE_DB']) return false;
-		
+	
+		// TODO - TEST! utf8mb4 may not work....
 		$sql = "CREATE TABLE IF NOT EXISTS `Sessions` (
-			  `sid` varchar(". $this->config['SID_LEN'] .") NOT NULL,
+			  `sid` varchar(". $this->config['SID_LEN'] .") NOT NULL COLLATE utf8mb4_unicode_cs,
 			  `name` varchar(32) NOT NULL,
 			  `value` longtext NOT NULL,
 			  `created` timestamp NOT NULL default CURRENT_TIMESTAMP,
 			  `expires` datetime NOT NULL,
 			  PRIMARY KEY  (`sid`,`name`)
-			) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;";
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ;";
 			
 		$q = new Query($sql);
 		

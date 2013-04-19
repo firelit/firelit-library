@@ -27,7 +27,7 @@ class DB {
 		$dsn = 'mysql:dbname='. $config['DB_NAME'] .';host='. $config['DB_IP'];
 		
 		try {
-			self::$conn = new PDO($dsn, $config['DB_USER'], $config['DB_PASS']);
+			self::$conn = new PDO($dsn, $config['DB_USER'], $config['DB_PASS'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
 		} catch (PDOException $e) {
 			throw new Exception('Unable to connect to database.');
 		}
