@@ -7,16 +7,16 @@ class Config {
 	// Load all other data from DB?
 	
 	public static $DB = array(
-		'DB_NAME' => '',
-		'DB_IP' => '',
-		'DB_USER' => '',
-		'DB_PASS' => ''
+		'DB_NAME' => $_ENV['DB_NAME'],
+		'DB_IP' => $_ENV['DB_IP'],
+		'DB_USER' => $_ENV['DB_USER'],
+		'DB_PASS' => $_ENV['DB_PASS']
 	);
 	
 	public static $Session = array(
 		'KEY_NAME' => 'firelit-sid', // Name of the cookie stored in remote browser
 		'SID_LEN' => 32, // Length of key in charchters
-		'DAYS_EXPIRE' => 7, // How long session variables are stored locally (n/a if USE_DB is false)
+		'DAYS_EXPIRE' => 7, // How long session variables are stored (n/a if USE_DB is false)
 		'USE_DB' => false // Instead of native PHP session support, for multi-server environment
 	);
 	

@@ -12,7 +12,7 @@ class Session {
 	public $config = array(
 		'KEY_NAME' => 'firelit-sid', // Name of the cookie stored in remote browser
 		'SID_LEN' => 32, // Length of key in charchters
-		'DAYS_EXPIRE' => 7, // How long session variables are stored locally (n/a if USE_DB is false)
+		'DAYS_EXPIRE' => 7, // How long session variables are stored (n/a if USE_DB is false)
 		'USE_DB' => false // Instead of native PHP session support, for multi-server environment
 	);
 	
@@ -82,16 +82,18 @@ class Session {
 		
 	}
 	
-	function __set($name, $val) {
+	function __set($name, $val, $expireDays = false) {
 		
 		if ($this->config['USE_DB']) {
+			
+			if (!$expireDays) $expireDays = $this->config['DAYS_EXPIRE'];
 			
 			$q = new Query();
 			$q->replace('Sessions', array(
 				'sid' => $this->SID,
 				'name' => $name,
 				'value' => serialize($val),
-				'expires' => array('SQL', 'DATE_ADD(NOW(), INTERVAL '. $this->config['DAYS_EXPIRE'] .' DAY)')
+				'expires' => array('SQL', 'DATE_ADD(NOW(), INTERVAL '. $expireDays .' DAY)')
 			));
 			
 			return $q->success(__FILE__, __LINE__);

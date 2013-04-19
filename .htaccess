@@ -1,0 +1,5 @@
+# DB Environment Variables
+SetEnv DB_NAME 	databasename
+SetEnv DB_IP 		localhost
+SetEnv DB_USER 	username
+SetEnv DB_PASS 	password
