@@ -4,7 +4,7 @@ namespace 'Firelit';
 
 include_once('library.php');
 
-class DB {
+class Query {
 	// Database connection & interaction class
 	
 	// Global connection & state variables 
@@ -216,8 +216,8 @@ class DB {
 		return $e[1]; // Driver specific error code.
 	}
 	
-	public function success($file = false, $line = false) {
-		if (!$this->res && $file) new LogIt(3, 'MySql error ('. $this->getErrorCode() .', '. $this->getError() .', '. $this->sql .')', $file, $line);
+	public function success(LogIt $logIt, $file = false, $line = false) {
+		if (!$this->res && $file) $logIt->now(3, 'MySql error ('. $this->getErrorCode() .', '. $this->getError() .', '. $this->sql .')', $file, $line);
 		return $this->res;
 	}
 	
@@ -236,7 +236,11 @@ class DB {
 				throw new Exception('Invalid database column name specified.');
 			
 			$sql1 .= ', `'. $col .'`';
-			$sql2 .= ", :". $col;
+			
+			if (is_array($val) && ($val[0] == 'SQL'))
+				$sql2 .= ", ". $val[1];
+			else
+				$sql2 .= ", :". $col;
 			
 		}
 		
@@ -262,7 +266,12 @@ class DB {
 		}
 		
 		return substr($sql, 2);
-					
+		
+	}
+	
+	public function __clone() {
+		$this->res = false;
+		$this->sql = false;
 	}
 	
 }

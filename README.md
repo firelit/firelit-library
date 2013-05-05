@@ -8,6 +8,26 @@ Classes Included
 
 ### ApiResponse
 
+A response-handling class for API end-points. Can handle all HTTP response codes and JSON & (limited) XML. Set a template to ensure some fields are always sent back with the response.
+
+Example usage:
+```php
+<?php
+
+$resp = ApiResponse::init('JSON');
+
+$resp->setTemplate(array(
+	'success' => false,
+	'message' => ''
+));
+
+$resp->code(404);
+
+$resp->respondAndEnd(array(
+	'message' => 'Resource could not be located.'
+));
+```
+
 ### DB
 
 A database interaction class. Makes database connection management and SQL authoring slightly easier. 
