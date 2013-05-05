@@ -2,7 +2,7 @@
 
 namespace 'Firelit';
 
-class SessionStoreDB implements SessionStore {
+class SessionStoreDB extends SessionStore {
 	
 	private $db, $sid, $sessionAvail;
 	

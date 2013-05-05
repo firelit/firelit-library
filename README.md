@@ -36,19 +36,19 @@ Example usage:
 ```php
 <?php
 
-$db = new Firelit\DB();
+$q = new Firelit\Query();
 
-$db->insert('TableName', array(
+$q->insert('TableName', array(
 	/* columnName => value */
 	'name' => $name,
 	'state' => $state
 ));
 
-if (!$db->success()) die('It did not work :(');
+if (!$q->success()) die('It did not work :(');
 
-$db->query("SELECT * FROM `TableName` WHERE `name`=:name", array('name' => $name));
+$q->query("SELECT * FROM `TableName` WHERE `name`=:name", array('name' => $name));
 
-while ($row = $db->getRow()) 
+while ($row = $q->getRow()) 
 	echo $row['name'] .': '. $row['state'] .'<br>';
 ```
 
@@ -73,7 +73,7 @@ Please remember to restrict access (eg, via .htaccess) to any files you may be u
 
 ### Session
 
-Session management class which can use PHP's native session features or a database. You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods).
+Session management class which can use PHP's native session features or a database. You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods). The abstract method SessionStore defines how the session system stores and retrieves the data. This library provides database and PHP versions of the SessionStore class. Roll your own by extending SessionStore and use a class of this object when instantiating the Session object.
 
 Note that if you are using PHP's native session support (which is an option), the expiration of a session is controlled by the `session.gc_maxlifetime` parameter.
 
@@ -81,7 +81,8 @@ Example usage:
 ```php
 <?php
 
-$sess = new Session();
+$store = Firelit\SessionStore:init('DB');
+$sess = new Firelit\Session($store);
 
 $sess->loggedIn = true;
 $sess->userName = 'Peter';

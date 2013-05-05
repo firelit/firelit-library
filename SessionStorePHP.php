@@ -2,7 +2,7 @@
 
 namespace 'Firelit';
 
-class SessionStorePHP implements SessionStore {
+class SessionStorePHP extends SessionStore {
 	
 	public function __construct() {
 		

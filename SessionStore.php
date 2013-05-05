@@ -2,12 +2,17 @@
 
 namespace 'Firelit';
 
-interface class SessionStore {
+abstract class SessionStore {
 	
-	public function set($name, $value, $expires = false);
+	abstract public function set($name, $value, $expires = false);
 	
-	public function get($name);
+	abstract public function get($name);
 	
-	public function destroy();
+	abstract public function destroy();
+	
+	static function init($type = 'PHP') {
+		$type = 'SessionStore'. $type;
+		return new $type();
+	}
 	
 }
