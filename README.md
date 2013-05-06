@@ -3,6 +3,13 @@ Firelit-Library
 
 Firelit's standard PHP library provides a set of helpful classes for developing a website. The are created so that they can easily be used with an auto-loader, following the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
 
+Requirements
+------------
+
+- PHP version 5.4.0 and higher
+- PDO PHP extension
+- MultiByte PHP extension
+
 Classes Included
 ----------------
 
