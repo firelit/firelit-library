@@ -84,7 +84,7 @@ new Firelit\LogEntry(5, 'The website is going down!', __FILE__, __LINE__);
 
 // Exceptions can be logged:
 try {
-	// Something that throws an exception
+	throw new \Exception('all your base are belong to us');
 } catch (Exception $e) {
 	new Firelit\LogEntry(4, $e);
 }
