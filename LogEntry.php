@@ -2,25 +2,24 @@
 
 namespace 'Firelit';
 
-if (!defined('FIRELIT_LOGIT_DB_TABLE')) define('FIRELIT_LOGIT_DB_TABLE', false); // Name of the DB table to log to
-if (!defined('FIRELIT_LOGIT_FILE')) define('FIRELIT_LOGIT_FILE', false); // Name of the file to log to
-if (!defined('FIRELIT_LOGIT_FILE_BACKUP')) define('FIRELIT_LOGIT_FILE_BACKUP', false); // Use file logging only as backup, only
-if (!defined('FIRELIT_LOGIT_LEVEL_MIN')) define('FIRELIT_LOGIT_LEVEL_MIN', 0); // Min allowable priority level
-if (!defined('FIRELIT_LOGIT_LEVEL_MAX')) define('FIRELIT_LOGIT_LEVEL_MAX', 5); // Max allowable priority level
-
-include_once('library.php');
-
-class LogIt {
+class LogEntry {
 	
-	// The name of the table to log to, or false n/a
-	public $dbTable = FIRELIT_LOGIT_DB_TABLE;
-	// The name of the file to log to, or false n/a
-	public $file = FIRELIT_LOGIT_FILE;
-	// Write to file only upon DB error
-	public $fileBackupOnly = FIRELIT_LOGIT_FILE_BACKUP;
-	
-	private $minLevel = FIRELIT_LOGIT_LEVEL_MIN;
-	private $maxLevel = FIRELIT_LOGIT_LEVEL_MAX;
+	// Default config
+	private static $config = array(
+		'database' => array(
+			'enabled' => false, // Enable database-based logging
+			'tablename' => 'Log' // Name of table to log to
+		),
+		'file' => array(
+			'enabled' => false, // Enable file-based logging
+			'dbbackup' => false, // Use file-based logging as backup for db failures
+			'filename' => '.applog' // File where to log entries
+		),
+		'levels' => array(
+			'min' => 0, // Minimum logging level
+			'max' => 5 // Maximum logging level
+		)
+	);
 	
 	function __construct($level = false, $entry = false, $file = false, $line = 0, $user = false) { 
 		/*
@@ -32,35 +31,48 @@ class LogIt {
 				3 = Warning - something that may or may not be an error
 				4 = Error - something is wrong and needs to be checked soon
 				5 = Critical - highest level, serious error, must be addressed ASAP
-			$entry : A textual description of the issue
+			$entry : A textual description of the issue *OR* an exception object
 			$file : The source file for the error
 			$line : The line number of the issue reporting
 			$user : The user logged in, if available
 			
 		*/
 		
-		if ($level != false) $this->now($level, $entry, $source, $user);
+		// If it is an actual entry, not just instantiating an object, add log entry:
+		if ($level != false) $this->now($level, $entry, $file, $line, $user);
 		
 	}
 	
-	public function now($level, $entry, $file, $line = 0, $user = false) {
+	static function config($config) {
+		$this->config = array_merge($config, $this->config);
+	}
+	
+	public function now($level, $entry, $file = false, $line = 0, $user = false) {
 		
-		if (!$this->dbTable && !$this->file) 
-			throw new \Exception('No log destination specified.');
+		if (is_object($entry) && ($entry instanceof \Exception)) {
+			$exception = $entry;
+			if (!$file) $file = $exception->getFile();
+			if (!$line) $line = $exception->getLine();
+			$entry = $exception->getMessage();
+			return false;
+		}
+		
+		if (!self::$config['database']['enabled'] && !self::$config['file']['enabled']) 
+			throw new \Exception('No logging destination specified.');
 		
 		$level = intval($level);
-		if ($level < $this->minLevel) $level = $minLevel;
-		if ($level > $this->maxLevel) $level = $maxLevel;
+		if ($level < self::$config['levels']['min']) $level = self::$config['levels']['min'];
+		if ($level > self::$config['levels']['max']) $level = self::$config['levels']['max'];
 		
 		$dbError = false;
 		
-		if ($this->dbTable) {
+		if (self::$config['database']['enabled']) {
 			
 			$dbError = ! $this->toDb($level, $entry, $file, $line, $user);
 			
 		}
 		
-		if ($this->file && ($dbError || !$fileBackupOnly)) {
+		if (self::$config['file']['enabled'] && ($dbError || !$fileBackupOnly)) {
 			
 			$this->toFile($level, $entry, $file, $line, $user);
 			
@@ -75,7 +87,8 @@ class LogIt {
 	public toDb($level, $entry, $file, $line = 0, $user = false) {
 	
 		$q = new Query();
-		$q->insert($this->dbTable, array(
+		
+		$q->insert(self::config['database']['tablename'], array(
 			'level' => $level,
 			'entry' => $entry,
 			'source' => $file .':'. $line,
@@ -106,7 +119,7 @@ class LogIt {
 			$_SERVER['REMOTE_ADDR'] .' | '. 
 			date('r');
 		
-		return file_put_contents($this->file, $text, FILE_APPEND);
+		return file_put_contents(self::$config['file']['filename'], $text, FILE_APPEND);
 		
 	}
 	
@@ -114,10 +127,7 @@ class LogIt {
 		// One-time install
 		// Create the supporting tables in the db
 		
-		if (!FIRELIT_LOGIT_DB_TABLE) 
-			throw new \Exception('Table must be defined for LogIt install.');
-		
-		$sql = "CREATE TABLE IF NOT EXISTS `Log` (
+		$sql = "CREATE TABLE IF NOT EXISTS `". self::$config['database']['tablename'] ."` (
 			  `id` int(10) UNSIGNED NOT NULL auto_increment,
 			  `level` int(5) UNSIGNED,
 			  `entry` text NOT NULL,

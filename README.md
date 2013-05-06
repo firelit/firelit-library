@@ -36,6 +36,14 @@ Example usage:
 ```php
 <?php
 
+// One-time connection setup
+Firelit\Query::connect(array(
+	'db_name' => 'database',
+	'db_ip' => 'localhost',
+	'db_user' => 'username',
+	'db_pass' => 'password'
+));
+
 $q = new Firelit\Query();
 
 $q->insert('TableName', array(
@@ -58,15 +66,28 @@ while ($row = $q->getRow())
 
 ### HttpRequest
 
-### LogIt 
+### LogEntry 
 
-An application logging class for recording errors, events or other useful data to either a database table or a file.
+An application logging class for recording errors, events or other useful data to either a database table or a file. 
 
 Example usage:
 ```php
 <?php
 
-new Firelit\LogIt(5, 'The website is going down!', __FILE__, __LINE__);
+// One-time logger setup
+Firelit\LogEntry::config(array(
+	'file' => array('enabled' => true)
+));
+
+// Standard textual/contextual log entry:
+new Firelit\LogEntry(5, 'The website is going down!', __FILE__, __LINE__);
+
+// Exceptions can be logged:
+try {
+	// Something that throws an exception
+} catch (Exception $e) {
+	new Firelit\LogEntry(4, $e);
+}
 ```
 
 Please remember to restrict access (eg, via .htaccess) to any files you may be using for logging.

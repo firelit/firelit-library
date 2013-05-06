@@ -24,10 +24,20 @@ class Query {
 	
 	public static function connect($config) {
 		
-		$dsn = 'mysql:dbname='. $config['DB_NAME'] .';host='. $config['DB_IP'];
+		/*
+			Expects an associative array:
+			$config = array(
+				'db_name' => 'database',
+				'db_ip' => 'localhost',
+				'db_user' => 'username',
+				'db_pass' => 'password'
+			);
+		*/
+		
+		$dsn = 'mysql:dbname='. $config['db_name'] .';host='. $config['db_ip'];
 		
 		try {
-			self::$conn = new PDO($dsn, $config['DB_USER'], $config['DB_PASS'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
+			self::$conn = new PDO($dsn, $config['db_user'], $config['db_pass'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
 		} catch (PDOException $e) {
 			throw new Exception('Unable to connect to database.');
 		}
