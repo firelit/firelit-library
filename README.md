@@ -37,7 +37,7 @@ $resp->respondAndEnd(array(
 
 ### CheckHTTPS
 
-A short class to help verify a connection is secure (ie, TLS) and take action (ie, redirect or return error) if it isn't. It would be best if this were done via the web server settings but this isn't always possible.
+A short class to help verify a connection is secure (ie, using TLS) and take action (ie, redirect or return error) if it isn't. It would be best if this were done via the web server settings but this isn't always possible.
 
 Example usage:
 ```php
@@ -50,38 +50,6 @@ Firelit\CheckHTTPS::redirect();
 Firelit\CheckHTTPS::error(function() {
 	new Firelit\LogEntry(1, 'Connection is not secure and it needs to be.', __FILE__, __LINE__);
 });
-```
-
-### DB
-
-A database interaction class. Makes database connection management and SQL authoring slightly easier. 
-
-Example usage:
-```php
-<?php
-
-// One-time connection setup
-Firelit\Query::connect(array(
-	'db_name' => 'database',
-	'db_ip' => 'localhost',
-	'db_user' => 'username',
-	'db_pass' => 'password'
-));
-
-$q = new Firelit\Query();
-
-$q->insert('TableName', array(
-	/* columnName => value */
-	'name' => $name,
-	'state' => $state
-));
-
-if (!$q->success()) die('It did not work :(');
-
-$q->query("SELECT * FROM `TableName` WHERE `name`=:name", array('name' => $name));
-
-while ($row = $q->getRow()) 
-	echo $row['name'] .': '. $row['state'] .'<br>';
 ```
 
 ### Email
@@ -134,6 +102,38 @@ try {
 ```
 
 Please remember to restrict access (eg, via .htaccess) to any files you may be using for logging.
+
+### Query
+
+A database interaction class and SQL query creator. Makes database connection management and SQL authoring slightly easier. 
+
+Example usage:
+```php
+<?php
+
+// One-time connection setup
+Firelit\Query::config(array(
+	'db_name' => 'database',
+	'db_ip' => 'localhost',
+	'db_user' => 'username',
+	'db_pass' => 'password'
+));
+
+$q = new Firelit\Query();
+
+$q->insert('TableName', array(
+	/* columnName => value */
+	'name' => $name,
+	'state' => $state
+));
+
+if (!$q->success()) die('It did not work :(');
+
+$q->query("SELECT * FROM `TableName` WHERE `name`=:name", array('name' => $name));
+
+while ($row = $q->getRow()) 
+	echo $row['name'] .': '. $row['state'] .'<br>';
+```
 
 ### Session
 

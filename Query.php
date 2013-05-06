@@ -8,7 +8,7 @@ class Query {
 	// Database connection & interaction class
 	
 	// Global connection & state variables 
-	public static $conn = false;
+	public static $config = false, $conn = false;
 	
 	public static $validTableName = '/^[a-zA-Z_][a-zA-Z0-9_]*$/'; // Regex for acceptable table names
 	public static $validColName = '/^[a-zA-Z_][a-zA-Z0-9_]*$/'; // Regex for acceptable column names
@@ -19,10 +19,12 @@ class Query {
 	
 	public function __construct() {
 		// Connect to the database
+		
 		if (!self::$conn) $this->connect();
+		
 	}	
 	
-	public static function connect($config) {
+	public static function config($config) {
 		
 		/*
 			Expects an associative array:
@@ -34,12 +36,27 @@ class Query {
 			);
 		*/
 		
-		$dsn = 'mysql:dbname='. $config['db_name'] .';host='. $config['db_ip'];
+		if (!is_array($config)) throw new \Exception('Database connection configuration not provided.');
+		
+		$this->config = $config;
+		
+	}
+	
+	public static function connect() {
+		
+		if (!$this->config) throw new \Exception('Database connection configuration not provided.');
+		
+		
+		$dsn = 'mysql:dbname='. $this->config['db_name'] .';host='. $this->config['db_ip'];
 		
 		try {
-			self::$conn = new PDO($dsn, $config['db_user'], $config['db_pass'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
+			
+			self::$conn = new PDO($dsn, $this->config['db_user'], $this->config['db_pass'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
+			
 		} catch (PDOException $e) {
-			throw new Exception('Unable to connect to database.');
+			
+			throw new Exception('Unable to connect to database: '. $e->getMessage());
+			
 		}
 		
   	return self::$conn;
