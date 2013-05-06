@@ -62,9 +62,28 @@ while ($row = $q->getRow())
 
 ### Email
 
+An email to properly form and send emails with database-based queueing support.
+
 ### Encrypt
 
+An encryption/decryption class.
+
+### EndWithError
+
+A class to terminate the script, set the error code and display an error page.
+
+```php
+<?php
+
+// Optionally create an HTML page to display
+$body = Firelit\EndWithError:createErrorBody('Page Not Found', 'Page Not Found', 'Sorry, we could not find the page you were looking for.');
+
+Firelit\EndWithError::now(404, $body);
+```
+
 ### HttpRequest
+
+A class to manage new HTTP requests to external web services and websites.
 
 ### LogEntry 
 

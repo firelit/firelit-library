@@ -15,49 +15,6 @@ function createKey($keyLen) {
 	return $key;
 }
 
-function returnErr($httpErrNum, $msg) {
-	// Return an HTTP error to the browser
-	
-	switch (intval($httpErrNum)) {
-		case 400:
-			header("HTTP/1.1 400 Bad Request");
-			$httpMsg = 'Bad Request';
-			// The request could not be understood by the server due to malformed syntax.
-			break;
-		case 403:
-			header("HTTP/1.1 403 Forbidden");
-			$httpMsg = 'Forbidden';
-			// The server understood the request, but is refusing to fulfill it.
-			break;
-		case 404:
-			header("HTTP/1.1 404 Not Found");
-			$httpMsg = 'File Not Found';
-			// The server has not found anything matching the Request-URI.
-			break;
-		case 500:
-			header("HTTP/1.1 500 Internal Server Error");
-			$httpMsg = 'Internal Server Error';
-			// The server encountered an unexpected condition which prevented it from fulfilling the request. 
-			break;			
-		case 503:
-			header("HTTP/1.1 503 Service Unavailable");
-			$httpMsg = 'Service Unavailable';
-			// The server is currently unable to handle the request due to a temporary overloading or maintenance of the server.
-			break;
-		default:
-			header("HTTP/1.1 500 Internal Server Error");
-			$httpMsg = 'Internal Server Error';
-			// The server encountered an unexpected condition which prevented it from fulfilling the request.
-			break;
-	}												
-	echo '<html><head><title>Error '. intval($httpErrNum) .' - '. $httpMsg .'</title></head>';
-	echo '<body style="background-color:#D9D9D9;"><div style="width:500px;margin:40px auto;padding:20px 40px;border:10px solid #737382;background-color:white;color:#474750;font-family:arial;border-radius:10px;box-shadow: 0 3px 5px 5px #B9B9B9;">';
-	echo '<h1 style="font-size:1em;">Error '. intval($httpErrNum) .' - '. $httpMsg .'</h1>';
-	echo '<p style="font-size:1em;">'. $msg .'</p>';
-	echo '<p style="font-size:1em;"><a href="/" style="color:#474750;font-size:.8em;">Home Page</a></p>';
-	echo '</div></body></html>';
-	exit;
-}
 
 function forceSSL($redirect = true) {
 	// Force page access by SSL only
