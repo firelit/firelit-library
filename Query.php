@@ -279,6 +279,29 @@ class Query {
 		
 	}
 	
+	
+	public static function searchSer($intArray) {
+		// Searchable serialize (int only)
+		// Makes an array of ints easily searchable in a db table
+		if (!is_array($intArray) || !sizeof($intArray)) return ';;';
+		
+		foreach ($intArray as $i => $v) $intArray[$i] = intval($v);
+		
+		return ';'.implode(';', $intArray).';';
+		
+	}
+	
+	public static function searchUnser($string) {
+		// Searchable unserialize (int only)
+		if (strlen($string) < 3) return array();
+		$intArray = explode(';', substr($string, 1, -1));
+		
+		foreach ($intArray as $i => $v) $intArray[$i] = intval($v);
+		
+		return $intArray;
+		
+	}
+	
 	public function __clone() {
 		$this->res = false;
 		$this->sql = false;

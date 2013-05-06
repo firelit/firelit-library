@@ -35,6 +35,23 @@ $resp->respondAndEnd(array(
 ));
 ```
 
+### CheckHTTPS
+
+A short class to help verify a connection is secure (ie, TLS) and take action (ie, redirect or return error) if it isn't. It would be best if this were done via the web server settings but this isn't always possible.
+
+Example usage:
+```php
+<?php
+
+// Simple redirect if the connection isn't secure
+Firelit\CheckHTTPS::redirect();
+
+// Or log the insecure access attempt and exit with HTTP 400
+Firelit\CheckHTTPS::error(function() {
+	new Firelit\LogEntry(1, 'Connection is not secure and it needs to be.', __FILE__, __LINE__);
+});
+```
+
 ### DB
 
 A database interaction class. Makes database connection management and SQL authoring slightly easier. 
@@ -137,6 +154,17 @@ $sess->userName = 'Peter';
 echo '<p>Hello '. $sess->userName .'</p>';
 
 $sess->destroy();
+```
+
+### Strings
+
+A set of string helper functions wrapped into a class.
+
+Example usage:
+```php
+<?php
+
+Firelit\Strings::cleanUTF8($_POST);
 ```
 
 ### User
