@@ -2,8 +2,6 @@
 
 namespace 'Firelit';
 
-include_once('library.php');
-
 class Email {
 	
 	private $htmlBody = '';

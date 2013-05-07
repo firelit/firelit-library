@@ -4,8 +4,6 @@ namespace 'Firelit';
 
 if (!defined('PASS_BLOWFISH')) define('PASS_BLOWFISH', true);
 
-include_once('library.php');
-
 class Encrypt {
 	
 	function __construct() { }

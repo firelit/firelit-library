@@ -10,8 +10,6 @@ $us = new UserSession($sess, $user); // ?????????
 
 namespace 'Firelit';
 
-include_once('library.php');
-
 class User {
 	
 	private $session;
