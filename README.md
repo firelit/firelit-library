@@ -55,7 +55,48 @@ Firelit\CheckHTTPS::error(function() {
 
 ### Email
 
-*TODO:* An email to properly form and send emails with database-based queueing support. Comming soon...
+An email to properly form and send emails with MIME multi-part, database-based queueing and SMTP support.
+
+Two email handling classes are included: EmailSender and EmailStore. See example usage below. Roll your own email sender and email store by extending these abstract classes.
+
+Example usage:
+```php
+<?php
+
+Firelit\EmailSenderSMTP::config(array(
+	'smtp_host' => 'localhost',
+	'smtp_port' => 25,
+	'smtp_user' => 'example',
+	'smtp_pass' => 'elpmaxe'
+));
+
+Firelit\EmailStoreDB::config(array(
+	'tableName' => 'EmailQueue'
+));
+
+$email = new Firelit\Email();
+
+$email->addTo('Jim Bo', 'jimbo@firelit.com'); // Add name & email addresses
+$email->to .= ', noname@firelit.com'; // Or set the to, cc & bcc field explicity through their properties
+
+$email->addCc('Accounting', 'accounting@firelit.com');
+$email->addBcc('Compliance', 'compliance@firelit.com');
+
+$email->subject = 'An important email';
+
+$email->html = '<h1>Email Test!</h1>'; // Set the html part of the email
+$email->text = '*Email Test!*'; // Set the text part of the email
+
+if ($storeAndSend) {
+	// You can use the EmailStore object to manage a db-based email queue
+	$store = Firelit\EmailStore::init('DB');
+	$store->storeAndSend( $email, Firelit\EmailSender::init('SMTP') ); // Store in DB and then try sending
+} elseif ($noStoreJustSend) {
+	// You can use the EmailSender class to send it out immediately
+	$sender = Firelit\EmailSender::init('SMTP');
+	$sender->send($email);
+}
+```
 
 ### Encrypt
 
