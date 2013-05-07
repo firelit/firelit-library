@@ -8,23 +8,29 @@ class SessionStoreDB extends SessionStore {
 	
 	// Defaults
 	private $config = array(
-		'keyName' => 'firelit-sid', // Name of the cookie stored in remote browser
-		'sidLen' => 32, // Length of key in characters
-		'defExpSec' => (60 * 60 * 24 * 7) // How long session variables are stored by default (in seconds)
+		'tableName' => 'Sessions',
+		'sidLength' => 40, // Length of key in characters
+		'expireSeconds' => (60 * 60 * 24 * 7), // How long session variables are stored by default (in seconds)
+		'cookie' => array(
+			'name' => 'firelit-sid',
+			'baseUrl' => '/',
+			'sslOnly' => false
+		)
 	);
 	
 	public function __construct(Query $queryObject, $config = array()) {
+		// See the above config array for possible config array keys
 		
 		$this->db = $queryObject;
 		
 		// Merge config data with defaults
 		$this->config = array_merge($config, $this->config);
 		
-		$keyName = $this->config['keyName'];
+		$keyName = $this->config['cookie']['name'];
 		
 		$sid = false;
 		
-		if (isset($_COOKIE[$keyName]) && (strlen($_COOKIE[$keyName]) == $this->config['sidLen'])) {
+		if (isset($_COOKIE[$keyName]) && (strlen($_COOKIE[$keyName]) == $this->config['sidLength'])) {
 			// Key available
 			
 			// Sanitize key
@@ -32,7 +38,7 @@ class SessionStoreDB extends SessionStore {
 			$sid = preg_replace('/[^0-9A-Za-z]+/', '', $sid);
 			
 			// After invalid characters removed, too short?
-			if (strlen($sid) != $this->config['sidLen']) $sid = false;
+			if (strlen($sid) != $this->config['sidLength']) $sid = false;
 			
 		}
 		
@@ -42,12 +48,14 @@ class SessionStoreDB extends SessionStore {
 			// Too late if headers sent (throw exception later if access attempted)
 			if (headers_sent()) return false;
 			
-			$sid = self::createSid($this->config['sidLen']);
+			$sid = self::createSid($this->config['sidLength']);
 			
 			$expire = time() + ( 86400 * 365 * 10 ); // 10 years from now
+			$baseUrl = $this->config['cookie']['baseUrl'];
+			$sslOnly = $this->config['cookie']['sslOnly'];
 			
 			// cookie_name, cookie_value, expire_time, path, host, ssl_only, no_js_access
-			setcookie($keyName, $sid, $expire, '/', $_SERVER['HTTP_HOST'], false, true);
+			setcookie($keyName, $sid, $expire, $baseUrl, $_SERVER['HTTP_HOST'], $sslOnly, true);
 			
 		}
 		
@@ -56,36 +64,33 @@ class SessionStoreDB extends SessionStore {
 		
 	}
 	
-	public function set($name, $value, $expires = false) {
+	public function store($valueArray) {
 		
 		if (!$this->sessionAvail)
 			throw new \Exception('Session ID could not be set. Session data will be lost.');
-			
-		$q = clone $this->db;
 		
-		$q->replace('Sessions', array(
+		$this->db->replace($this->config['tableName'], array(
 			'sid' => $this->sid,
-			'name' => $name,
-			'value' => serialize($value),
-			'expires' => array('SQL', ($expires ? 'DATE_ADD(NOW(), INTERVAL '. $expires .' SECOND)' : '0000-00-00 00:00:00'))
+			'value' => serialize($valueArray),
+			'expires' => array('SQL', 'DATE_ADD(NOW(), INTERVAL '. $this->config['expireSeconds'] .' SECOND)')
 		));
 		
-		return $q->success(__FILE__, __LINE__);
+		if (!$this->db->success(__FILE__, __LINE__))
+			throw new \Exception('Error storing session.');
 		
 	}
 	
-	public function get($name) {
+	public function fetch() {
 	
 		if (!$this->sessionAvail)
 			throw new \Exception('Session ID could not be set. Session data not available.');
-			
-		$q = clone $this->db;
 		
-		$q->select('Sessions', false, "`sid`=:sid AND `name`=:name AND `expires`>NOW()", array(':sid' => $this->sid, ':name' => $name), 1);
+		$this->db->select($this->config['tableName'], false, "`sid`=:sid AND `expires`>NOW()", array(':sid' => $this->sid), 1);
 		
-		if (!$q->success(__FILE__, __LINE__)) return null;
+		if (!$this->db->success(__FILE__, __LINE__)) 
+			throw new \Exception('Error retrieving session data.');
 		
-		if ($row = $q->getRow()) return unserialize($row['value']);
+		if ($row = $this->db->getRow()) return unserialize($row['value']);
 		else return null;
 		
 	}
@@ -95,13 +100,9 @@ class SessionStoreDB extends SessionStore {
 		// Nothing to destroy
 		if (!$this->sessionAvail) return true;
 		
-		$q = clone $this->db;
+		$this->db->delete($this->config['tableName'], "`sid`=:sid", array(':sid' => $this->sid));
 		
-		$q->delete('Sessions', "`sid`=:sid", array(':sid' => $this->sid));
-		
-		$res2 = self::cleanExpired();
-		
-		return $q->success(__FILE__, __LINE__);
+		return $this->db->success(__FILE__, __LINE__);
 		
 	}
 	
@@ -120,36 +121,34 @@ class SessionStoreDB extends SessionStore {
 		
 	}
 	
-	static function cleanExpired() {
+	public function cleanExpired() {
 		// Clean out expired data
 		
-		$q = clone $this->db;
+		$this->db->delete($this->config['tableName'], "`expires` <= NOW()");
 		
-		$q->delete('Sessions', "`expires` <= NOW()");
-		
-		return $q->success(__FILE__, __LINE__);
+		return $this->db->success(__FILE__, __LINE__);
 		
 	}
 	
-	static function install(Query $query) {
+	static function install(Query $query, $tableName = 'Sessions', $sidLength = 40) {
 		
 		// One-time install
 		// Create the supporting tables in the db
 		
 		// TODO - TEST! utf8mb4 may not work....
-		$sql = "CREATE TABLE IF NOT EXISTS `Sessions` (
-			  `sid` varchar(". $this->config['sidLen'] .") NOT NULL COLLATE utf8mb4_unicode_cs,
-			  `name` varchar(32) NOT NULL,
-			  `value` longtext NOT NULL,
+		$sql = "CREATE TABLE IF NOT EXISTS `". $tableName ."` (
+			  `sid` varchar(". $sidLength .") NOT NULL COLLATE utf8mb4_unicode_cs,
+			  `values` longtext NOT NULL,
 			  `created` timestamp NOT NULL default CURRENT_TIMESTAMP,
 			  `expires` datetime NOT NULL,
-			  PRIMARY KEY  (`sid`,`name`)
+			  UNIQUE KEY `sid` (`sid`),
+			  KEY `expires` (`expires`)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ;";
 			
 		$q = $query->query($sql);
 		
 		if (!$q->success()) 
-			throw new \Exception('Install failed! ('. __FILE__ .':'. __LINE__ .')');
+			throw new \Exception('Install failed!');
 			
 	}
 }

@@ -10,18 +10,25 @@ class SessionStorePHP extends SessionStore {
 		
 	}
 	
-	public function set($name, $value, $expires = false) {
+	public function store($valueArray, $expireSeconds = false) {
+		// $expireSeconds ignored - session expired handled by php.ini
 		
-		if (is_null($value)) unset($_SESSION[$name]);
-		else $_SESSION[$name] = $value;
+		foreach ($valueArray as $key => $val) {
+			if (is_null($val)) {
+				unset($_SESSION[$key]);
+				unset($valueArray[$key]);
+			}
+		}
 		
-		return true;
+		$_SESSION = $valueArray;
+		
+		return;
 		
 	}
 	
-	public function get($name) {
+	public function fetch() {
 		
-		return $_SESSION[$name];
+		return $_SESSION;
 		
 	}
 	

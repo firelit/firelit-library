@@ -137,7 +137,7 @@ while ($row = $q->getRow())
 
 ### Session
 
-Session management class which can use PHP's native session features or a database. You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods). The abstract method SessionStore defines how the session system stores and retrieves the data. This library provides database and PHP versions of the SessionStore class. Roll your own by extending SessionStore and use a class of this object when instantiating the Session object.
+Session management class which can use PHP's native session features or a database. You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods). The abstract method SessionStore defines how the session system stores and retrieves the data. This library provides database and PHP versions of the SessionStore class. Roll your own by extending SessionStore and use a class of this object when instantiating the Session object. Sessions are saved all at once at session object `__destruct` or when the `save()` method is explicitly called.
 
 Note that if you are using PHP's native session support (which is an option), the expiration of a session is controlled by the `session.gc_maxlifetime` parameter.
 
@@ -152,9 +152,9 @@ $sess->loggedIn = true;
 $sess->userName = 'Peter';
 
 echo '<p>Hello '. $sess->userName .'</p>';
-
-$sess->destroy();
 ```
+
+Note that if you're using a database as a session store that the expired values should be cleaned up regularly (eg, with a cron job) via the `SessionStoreDB->cleanExpired()` method.
 
 ### Strings
 

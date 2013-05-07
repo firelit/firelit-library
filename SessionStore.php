@@ -4,15 +4,26 @@ namespace 'Firelit';
 
 abstract class SessionStore {
 	
-	abstract public function set($name, $value, $expires = false);
+	// Set an array of values to be stored (treat $expireSeconds as garbage collection trigger more than session limiter)
+	abstract public function store($array);
 	
-	abstract public function get($name);
+	// Fetch all values for a session
+	abstract public function fetch();
 	
+	// Destroy a session and all stored values
 	abstract public function destroy();
 	
+	// Instantiate the child class
 	static function init($type = 'PHP') {
-		$type = 'SessionStore'. $type;
-		return new $type();
+		// init accepts additional arguments and passes them to the instantiation of the class
+		
+		$args = func_get_args();	
+		array_shift($args); // Remove the first argument before passing to object constructor
+		
+		$class = __class__ . $type;
+		$reflect  = new ReflectionClass($class);
+		return $reflect->newInstanceArgs($args);
+		
 	}
 	
 }

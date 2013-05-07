@@ -4,36 +4,80 @@ namespace 'Firelit';
 
 class Session {
 	
-	private $store, $cache = array();
-	public $sessionCacheEnabled = true;
+	private $store, $fetched = false, $cache = array(), $updatesToSave = false;
 	
-	private function __construct(SessionStore $store) {	
+	public function __construct(SessionStore $store) {	
 		// Create a session using the given SessionStore object
 		
 		$this->store = $store;
 		
 	}
 	
-	function __set($name, $val, $expireSeconds = false) {
+	public function __set($name, $val) {
 		// Magic sesion value setter 
 		
-		$res = $this->store->set($name, $val, $expireSeconds);
+		if (!$this->fetched) 
+		  $this->fetch();
 		
-		if ($this->sessionCacheEnabled && $res) $this->cache[$name] = $val;
+		$this->cache[$name] = $val;
+		$this->updatesToSave = true;
 		
 	}
 	
-	function __get($name, $flushCache = false) {
+	public function __unset($name) {
+		
+		unset($this->cache[$name]);
+		$this->updatesToSave = true;
+		
+	}
+	
+	public function __get($name) {
 		// Magic sesion value getter 
 		
-		if ($this->sessionCacheEnabled && !$flushCache && isset($this->cache[$name]))
+		if (!$this->fetched) 
+		  $this->fetch();
+		
+		if (isset($this->cache[$name]))
 			return $this->cache[$name];
 		
-		$val = $this->store->get($name);
+		return null;
 		
-		if ($this->sessionCacheEnabled) $this->cache[$name] = $val;
+	}
+	
+	public function __destruct() {
+		if ($this->updatesToSave)
+			$this->save();
+	}
+	
+	public function fetch($saveFirst = true) {
 		
-		return $val;
+		if ($saveFirst && $this->fetched && $this->updatesToSave) {
+			$this->save();
+		}
+		
+		$this->cache = $this->store->fetch();
+		$this->fetched = true;
+		$this->updatesToSave = false;
+	  
+	}
+	
+	public function save() {
+	
+		$this->store->store($this->cache);
+		
+		$this->updatesToSave = false;
+		
+	}
+	
+	public function discardUpdates() {
+		
+		$this->updatesToSave = false;
+		
+	}
+	
+	public function flushCache() {
+		
+		$this->fetch(false);
 		
 	}
 	
@@ -43,6 +87,8 @@ class Session {
 		$this->store->destroy();
 		
 		$this->cache = array();
+		$this->updatesToSave = false;
+		$this->fetched = true;
 		
 	}
 	
