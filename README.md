@@ -16,7 +16,7 @@ Classes Included
 
 ### ApiResponse
 
-A response-handling class for API end-points. Can handle all HTTP response codes and JSON & (limited) XML. Set a template to ensure some fields are always sent back with the response.
+A response-handling class for API end-points. Can handle all HTTP response codes and JSON & _limited_ XML. Set a template to ensure some fields are always sent back with the response.
 
 Example usage:
 ```php
@@ -55,11 +55,11 @@ Firelit\CheckHTTPS::error(function() {
 
 ### Email
 
-An email to properly form and send emails with database-based queueing support.
+*TODO:* An email to properly form and send emails with database-based queueing support. Comming soon...
 
 ### Encrypt
 
-An encryption/decryption class.
+*TODO:* An encryption/decryption class. Comming soon...
 
 ### EndWithError
 
@@ -76,7 +76,7 @@ Firelit\EndWithError::now(404, $body);
 
 ### HttpRequest
 
-A class to manage new HTTP requests to external web services and websites.
+*TODO:* A class to manage new HTTP requests to external web services and websites. Comming soon...
 
 ### LogEntry 
 
@@ -146,7 +146,7 @@ Example usage:
 ```php
 <?php
 
-$store = Firelit\SessionStore:init('DB');
+$store = Firelit\SessionStore:init('DB', new Query);
 $sess = new Firelit\Session($store);
 
 $sess->loggedIn = true;
@@ -170,9 +170,11 @@ Firelit\Strings::cleanUTF8($_POST);
 
 ### User
 
+*TODO:* A class for managing users. Comming soon...
+
 ### Vars
 
-### Visitor
+*TODO:* A class for managing application-level, persistent variables. Comming soon...
 
 Auto-Loader Example
 -------------------

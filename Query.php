@@ -36,7 +36,8 @@ class Query {
 			);
 		*/
 		
-		if (!is_array($config)) throw new \Exception('Database connection configuration not provided.');
+		if (!is_array($config)) 
+			throw new \Exception('Database connection configuration not provided.');
 		
 		$this->config = $config;
 		
@@ -44,7 +45,8 @@ class Query {
 	
 	public static function connect() {
 		
-		if (!$this->config) throw new \Exception('Database connection configuration not provided.');
+		if (!$this->config) 
+			throw new \Exception('Database connection configuration not provided.');
 		
 		
 		$dsn = 'mysql:dbname='. $this->config['db_name'] .';host='. $this->config['db_ip'];
@@ -70,7 +72,7 @@ class Query {
 		
 		$binder = array();
 		foreach ($array as $col => &$val) // By reference for db driver purposes
-			$binder[(preg_match('/^:/', $col) ? '' : ':').$col] = $val; 
+			$binder[(preg_match('/^:/', $col) ? '' : ':') . $col] = $val; 
 		
 		$this->sql = self::$conn->prepare($sql);
 		
@@ -243,8 +245,14 @@ class Query {
 		return $e[1]; // Driver specific error code.
 	}
 	
-	public function success(LogIt $logIt, $file = false, $line = false) {
-		if (!$this->res && $file) $logIt->now(3, 'MySql error ('. $this->getErrorCode() .', '. $this->getError() .', '. $this->sql .')', $file, $line);
+	public function success() {
+		return $this->res;
+	}
+	
+	public function logError(LogEntry $logger, $file, $line) {
+		if (!$this->res) 
+			$logger->now(3, 'MySql error ('. $this->getErrorCode() .', '. $this->getError() .', '. $this->sql .')', $file, $line);
+			
 		return $this->res;
 	}
 	
