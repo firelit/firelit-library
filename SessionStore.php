@@ -10,8 +10,8 @@ abstract class SessionStore {
 	
 	abstract public function destroy();
 	
-	static function init($type = 'PHP') {
-		$type = 'SessionStore'. $type;
+	static public function init($type = 'PHP') {
+		$type = __class__ . $type;
 		return new $type();
 	}
 	

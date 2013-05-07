@@ -4,7 +4,7 @@ namespace 'Firelit';
 
 class SessionStoreDB extends SessionStore {
 	
-	private $db, $sid, $sessionAvail;
+	private $query, $sid, $sessionAvail;
 	
 	// Defaults
 	private $config = array(
@@ -15,7 +15,7 @@ class SessionStoreDB extends SessionStore {
 	
 	public function __construct(Query $queryObject, $config = array()) {
 		
-		$this->db = $queryObject;
+		$this->query = $queryObject;
 		
 		// Merge config data with defaults
 		$this->config = array_merge($config, $this->config);
@@ -61,7 +61,7 @@ class SessionStoreDB extends SessionStore {
 		if (!$this->sessionAvail)
 			throw new \Exception('Session ID could not be set. Session data will be lost.');
 			
-		$q = clone $this->db;
+		$q = clone $this->query;
 		
 		$q->replace('Sessions', array(
 			'sid' => $this->sid,
@@ -79,7 +79,7 @@ class SessionStoreDB extends SessionStore {
 		if (!$this->sessionAvail)
 			throw new \Exception('Session ID could not be set. Session data not available.');
 			
-		$q = clone $this->db;
+		$q = clone $this->query;
 		
 		$q->select('Sessions', false, "`sid`=:sid AND `name`=:name AND `expires`>NOW()", array(':sid' => $this->sid, ':name' => $name), 1);
 		
@@ -95,7 +95,7 @@ class SessionStoreDB extends SessionStore {
 		// Nothing to destroy
 		if (!$this->sessionAvail) return true;
 		
-		$q = clone $this->db;
+		$q = clone $this->query;
 		
 		$q->delete('Sessions', "`sid`=:sid", array(':sid' => $this->sid));
 		
@@ -123,7 +123,7 @@ class SessionStoreDB extends SessionStore {
 	static function cleanExpired() {
 		// Clean out expired data
 		
-		$q = clone $this->db;
+		$q = clone $this->query;
 		
 		$q->delete('Sessions', "`expires` <= NOW()");
 		

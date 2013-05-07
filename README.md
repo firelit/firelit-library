@@ -7,8 +7,9 @@ Requirements
 ------------
 
 - PHP version 5.4.0 and higher
-- PDO PHP extension
 - MultiByte PHP extension
+- PDO PHP extension (required for Query class)
+- PEAR Mail and Mail mime extensions (required for Email class)
 
 Classes Included
 ----------------

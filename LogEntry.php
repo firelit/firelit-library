@@ -137,7 +137,7 @@ class LogEntry {
 			  `context` text NOT NULL,
 			  `time` timestamp NOT NULL default CURRENT_TIMESTAMP,
 			  KEY `id` (`id`)
-			) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
+			) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ;";
 			
 		$q = new Query($sql);
 		
