@@ -9,7 +9,7 @@ class EmailStoreDB extends EmailStore {
 		'expireSeconds' => 604800 // Emails expire in 7 days by default
 	);
 	
-	private $query, $table;
+	private $query, $table, $cache;
 	
 	public function __construct(Query $queryObject, $dbTable = 'EmailQueue') {
 		$this->query = $queryObject;
@@ -32,6 +32,26 @@ class EmailStoreDB extends EmailStore {
 			'expires' => array('SQL', 'DATE_ADD(NOW(), INTEREVAL '. $expires .' SECOND)')
 		));
 		
+		if (!$this->query->getAffected()) 
+			throw new Exception('Error while storing email.');
+			
+		$id = $this->query->getNewId();
+		
+		$this->cache[$id] = $email;
+		
+		return $id;
+		
+	}
+	
+	public function fetch($id, $filterExpired = true) {
+		
+		if (isset($this->cache[$id])) return $this->cache[$id];
+		
+		$this->query->select(self::$config['tableName'], array('email'), '`id`=:id'. ($filterExpired ? ' AND `expires`>NOW()'), array('id' => $id));
+		
+		if ($row = $this->query->fetch()) return unserialize($row['email']);
+		else return false;
+			
 	}
 	
 	public function storeAndSend(Email $email, EmailSender $sender, $expiresSeconds = false) {
@@ -40,7 +60,7 @@ class EmailStoreDB extends EmailStore {
 		
 		$id = $this->store($email, $expireSeconds);
 	
-		$this->sendOne($id, $sender);
+		return $this->sendOne($id, $sender);
 		
 	}
 	
@@ -75,51 +95,86 @@ class EmailStoreDB extends EmailStore {
 	}
 	
 	public function sendAll(EmailSender $sender) {
-		// TODO - query all and the sendOne()
+		
+		$this->query->select(self::$config['tableName'], '*', "`status`='QUEUED' AND `expires`>NOW() ORDER BY `created` ASC");
+		
+		while ($row = $this->query->getRow()) {
+			
+			// Save a fetch
+			$this->cache[$row['id']] = unserialize($row['email']);
+			
+			$this->sendOne($row['id'], $sender);
+			
+		}
+		
 	}
 	
 	public function sendOne($id, EmailSender $sender) {
-		// TODO - get from db, if sent ignore, mark sending, send, mark sent
 		
-		if ($this->markSending($id)) {
+		if (!$this->markSending($id)) return false;
+	
+		$email = $this->fetch($id);
 		
-			// TODO - Send it here!
+		if (!$email) return false;
+		
+		try {
 			
-			if ($this->markSent($id))
-				throw new Exception('Error marking sent email as sent: '. $id);
+			$sender->send($email);
+			
+		} catch (\Exception $e) {
+			
+			// Throw exception instead?
+			
+			if (!$this->markQueued($id))
+				throw new Exception('Error re-queueing email: '. $id);
+				
+			return false;
 			
 		}
+		
+		if (!$this->markSent($id))
+			throw new Exception('Error marking sent email as sent: '. $id);
+		
+		return true;
+		
 	}
 	
 	public function purgeSent($olderThanSeconds) {
-		// TODO - delete query
+		
+		$this->query->delete(self::$config['tableName'], "`status`='SENT' AND `sent`<DATE_SUB(NOW(), INTERVAL ". $olderThanSeconds ." SECOND)");
+		
 	}
 	
 	public function purgeAll($olderThanSeconds) {
-		// TODO - delete query
+		
+		$this->query->delete(self::$config['tableName'], "`sent`<DATE_SUB(NOW(), INTERVAL ". $olderThanSeconds ." SECOND)");
+		
 	}
 	
-	public function purgeExpired($olderThanSeconds) {
-		// TODO - delete query
+	public function purgeExpired($olderThanSeconds = 0) {
+		
+		$this->query->delete(self::$config['tableName'], "`expired`<=DATE_SUB(NOW(), INTERVAL ". $olderThanSeconds ." SECOND)");
+		
 	}
 	
 	public static function install(Query $query) {
 		// One-time install
 		// Create the supporting tables in the db
 		
-		// TODO
-		// TODO - TEST! utf8mb4 may not work....
+		// Running MySql >= 5.5.3 ? Use utf8mb4 insetad of utf8.
 		$sql = "CREATE TABLE IF NOT EXISTS `". self::$config['tableName'] ."` (
-			  `id` int,
-			  `to` text,
-			  `subject` text,
-			  `email` longtext,
-			  `status` enum('QUEUED', 'SENDING', 'SENT', 'ERROR'),
+			  `id` int(10) unsigned NOT NULL auto_increment,
+			  `to` text NOT NULL,
+			  `subject` text NOT NULL,
+			  `email` longtext NOT NULL,
+			  `status` enum('QUEUED','SENDING','SENT','ERROR') NOT NULL,
 			  `created` timestamp NOT NULL default CURRENT_TIMESTAMP,
 			  `expires` datetime NOT NULL,
 			  `sent` datetime NOT NULL,
-			  PRIMARY KEY `id` (`id`)
-			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ;";
+			  PRIMARY KEY  (`id`),
+			  KEY (`status`),
+			  KEY (`expires`)
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;"
 			
 		$q = $query->query($sql);
 		
