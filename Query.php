@@ -91,7 +91,7 @@ class Query {
 		
 		$binder = array();
 		foreach ($array as $col => &$val) // By reference for db driver purposes
-			$binder[':'.$col] = $val;
+			$binder[(preg_match('/^:/', $col) ? '' : ':').$col] = $val;
 		
 		return $this->res = $this->sql->execute($binder);
 		
@@ -108,7 +108,7 @@ class Query {
 		
 		$binder = array();
 		foreach ($array as $col => &$val) // By reference for db driver purposes
-			$binder[':'.$col] = $val;
+			$binder[(preg_match('/^:/', $col) ? '' : ':').$col] = $val;
 		
 		return $this->res = $this->sql->execute($binder);
 		
