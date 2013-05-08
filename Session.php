@@ -77,7 +77,7 @@ class Session {
 	
 	public function flushCache() {
 		
-		$this->fetch(false);
+		$this->cache = array();
 		
 	}
 	
