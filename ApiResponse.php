@@ -2,7 +2,7 @@
 
 namespace 'Firelit';
 
-abstract class ApiResponse {
+abstract class ApiResponse extends InitExtendable {
 	
 	private $code = 200;
 	private $response = array();
@@ -12,22 +12,6 @@ abstract class ApiResponse {
 	static $responseObject;
 	
 	public function __construct() { }
-	
-	static public function init($responseType) {
-		if ($responseType == 'JSON') {
-			
-			return new ApiResponseJSON();
-			
-		} elseif ($responseType == 'XML') {
-			
-			return new ApiResponseXML();
-			
-		} else {
-			
-			throw new Exception('Invalid ApiResponse type selected');
-			
-		}
-	}
 	
 	public function setTemplate($template) {
 		$this->response = array_merge($this->response, $template);	

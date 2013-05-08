@@ -254,10 +254,6 @@ Example usage:
 Firelit\Strings::cleanUTF8($_POST);
 ```
 
-### User
-
-*TODO:* A class for managing users. Comming soon...
-
 ### Vars
 
 *TODO:* A class for managing application-level, persistent variables. Comming soon...

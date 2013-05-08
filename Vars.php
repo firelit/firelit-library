@@ -2,7 +2,11 @@
 
 namespace 'Firelit';
 
-class Vars {
+abstract class Vars extends InitExtendable {
+	
+	public static $config = array(
+		'tableName' => 'Vars'
+	);
 	
 	function __construct() { }
 	
@@ -90,6 +94,34 @@ class Vars {
 				return false; // There were too many tries
 			}
 		}
+		
+	}
+	
+	public static function install() {
+		// One-time install
+		// Create the supporting tables in the db
+		
+		// Running MySql >= 5.5.3 ? Use utf8mb4 insetad of utf8.
+		$sql = "CREATE TABLE IF NOT EXISTS `". self::$config['tableName'] ."` (
+			  `id` int(10) unsigned NOT NULL auto_increment,
+			  `to` text NOT NULL,
+			  `subject` text NOT NULL,
+			  `email` longtext NOT NULL,
+			  `status` enum('QUEUED','SENDING','SENT','ERROR') NOT NULL,
+			  `created` timestamp NOT NULL default CURRENT_TIMESTAMP,
+			  `expires` datetime NOT NULL,
+			  `sent` datetime NOT NULL,
+			  PRIMARY KEY  (`id`),
+			  KEY (`status`),
+			  KEY (`expires`)
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;"
+			
+		$q = $query->query($sql);
+		
+		if (!$q->success()) 
+			throw new \Exception('Install failed! ('. __FILE__ .':'. __LINE__ .')');
+			
+		return $query->insertId();
 		
 	}
 

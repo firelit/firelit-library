@@ -183,6 +183,5 @@ class EmailStoreDB extends EmailStore {
 			
 		return $query->insertId();
 		
-			
 	}
 }
