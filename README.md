@@ -256,7 +256,20 @@ Firelit\Strings::cleanUTF8($_POST);
 
 ### Vars
 
-*TODO:* A class for managing application-level, persistent variables. Comming soon...
+A class for managing application-level, persistent variables. Vars is implemented through magic setters and getters so you can use any name you want. Storage is maintained by the VarsStore abstract class and data can be held in a file or in a database. For VarsStoreDB, each set or get is equal to one database SQL statement so this can get costly very quick if you are doing a lot of read/writes. Roll your own VarsStore by extending the class.
+
+Example usage:
+```php
+<?php
+
+$vars = new Firelit\Vars( Firelit\VarsStore::init('DB') );
+
+// Set a persistent application variable
+$vars->maintenanceMode = true;
+
+// Read a persistent application variable
+if ($vars->maintenanceMode) die('Sorry, under construction.');
+```
 
 Auto-Loader Example
 -------------------
