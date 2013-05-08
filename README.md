@@ -53,6 +53,34 @@ Firelit\CheckHTTPS::error(function() {
 });
 ```
 
+### Crypto
+
+A symmetrical-key encryption/decryption helper class (uses MCRYPT_RIJNDAEL_256 aka AES). Includes password hashing method.
+
+Example encryption/decryption usage:
+```php
+<?php
+
+$mySecretPassword = 'Super secret!';
+
+$iv = Firelit\Crypto::getIv();
+$encrypted = Firelit\Crypto::encrypt('Super secret text', $mySecretPassword, $iv);
+
+$decrypted = Firelit\Crypto::decrypt($encrypted, $mySecretPassword, $iv);
+```
+
+Example password hasing usage:
+```php
+<?php
+
+// Getting a hash for a new password
+list($hash, $salt) = Firelit\Crypto::password($_POST['new_password']);
+
+// Checking a submitted password against a user's stored info
+list($hash, $salt) = Firelit\Crypto::password($_POST['password'], $user['salt']);
+if ($user['hash'] == $hash) echo 'Password is correct!';
+```
+
 ### Email
 
 An email to properly form and send emails with MIME multi-part, database-based queueing and SMTP support.
@@ -98,14 +126,11 @@ if ($storeAndSend) {
 }
 ```
 
-### Encrypt
-
-*TODO:* An encryption/decryption class. Comming soon...
-
 ### EndWithError
 
 A class to terminate the script, set the error code and display an error page.
 
+Example usage:
 ```php
 <?php
 
