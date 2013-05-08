@@ -8,8 +8,9 @@ Requirements
 
 - PHP version 5.4.0 and higher
 - MultiByte PHP extension
-- PDO PHP extension (required for Query class)
-- PEAR Mail and Mail mime extensions (required for Email class)
+- cURL PHP extension (required for `HttpRequest` class)
+- PDO PHP extension (required for `Query` class)
+- PEAR Mail and Mail mime extensions (required for `EmailSenderSMTP` class)
 
 Classes Included
 ----------------
@@ -142,7 +143,26 @@ Firelit\EndWithError::now(404, $body);
 
 ### HttpRequest
 
-*TODO:* A class to manage new HTTP requests to external web services and websites. Comming soon...
+A class to manage new HTTP requests to external web services and websites. Includes file-based cookie support.
+
+Example usage:
+```php
+<?php
+
+Firelit\HttpRequest::config(array(
+	'userAgent' => 'My little user agent string'
+));
+
+$http = new Firelit\HttpRequest();
+
+$http->enableCookies();
+
+// 'get', 'post' and 'other' (for put, delete, etc) are also available methods
+$http->get('http://www.google.com/');
+
+// Hmmm, I wonder what cookies Google sets...
+echo '<pre>'. file_get_contents($http->cookieFile) .'</pre>';
+```
 
 ### LogEntry 
 

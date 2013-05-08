@@ -4,26 +4,40 @@ namespace 'Firelit';
 
 class HttpRequest {
 	
+	// cURL handle
 	private $handle = false;
 	
+	// Cookies
 	private $cookies = false;
-	public $cookieFile = false;
-	public $delCookieFile = true;
+	public $cookieFile = false; // File where the cookie data is stored
+	public $delCookieFile = true; // Delete when object destructs
 	
-	public static $userAgent = '';
-	public static $caInfo = '';
+	// If set, overwrites $config
+	public static $userAgent = false;
 	
 	private $respCode = 0;
 	
-	private $timeout = array(
-		'connect' => 3,
-		'response' => 10
+	public static $config = array(
+		'timeout' => array(
+			'connect' => 3,
+			'response' => 10
+		),
+		'userAgent' => false,
+		'caInfo' => false
 	);
 	
 	function __construct() {
 		
 		if (function_exists('curl_init')) $this->handle = curl_init();
-		if (!$this->handle) throw new Exception('Could not initiate curl.');
+		else throw new Exception('cURL required.');
+		
+		if (!$this->handle) throw new Exception('Could not initiate cURL.');
+		
+	}
+	
+	public static config($config) {
+		
+		self::$config = array_merge(self::$config, $config);
 		
 	}
 	
@@ -99,14 +113,15 @@ class HttpRequest {
 			
 		curl_setopt($this->handle, CURLOPT_URL, $url); // Set the URL
 		
-		if ($this->userAgent) curl_setopt($this->handle, CURLOPT_USERAGENT, $this->userAgent); // Cosmetic
+		if ($this->userAgent) curl_setopt($this->handle, CURLOPT_USERAGENT, $this->userAgent);
+		elseif (self::$config['userAgent']) curl_setopt($this->handle, CURLOPT_USERAGENT, self::$config['userAgent']);
 		
-		if ($this->caInfo) curl_setopt($this->handle, CURLOPT_CAINFO, $this->caInfo); // Name of the file to verify the server's cert against
-		if ($this->caInfo) curl_setopt($this->handle, CURLOPT_SSL_VERIFYPEER, 1); // Turns on verification of the SSL certificate.
+		if (self::$config['caInfo']) curl_setopt($this->handle, CURLOPT_CAINFO, self::$config['caInfo']); // Name of the file to verify the server's cert against
+		if (self::$config['caInfo']) curl_setopt($this->handle, CURLOPT_SSL_VERIFYPEER, 1); // Turns on verification of the SSL certificate.
 		
 		curl_setopt($this->handle, CURLOPT_RETURNTRANSFER, 1); // If not set, curl prints output to the browser
-		curl_setopt($this->handle, CURLOPT_CONNECTTIMEOUT, $this->timeout['connect']); // How long to wait for a connection
-		curl_setopt($this->handle, CURLOPT_TIMEOUT, $this->timeout['response']); // How long to wait for a response
+		curl_setopt($this->handle, CURLOPT_CONNECTTIMEOUT, self::$config['timeout']['connect']); // How long to wait for a connection
+		curl_setopt($this->handle, CURLOPT_TIMEOUT, self::$config['timeout']['response']); // How long to wait for a response
 		
 		if ($this->cookies) {
 			curl_setopt($this->handle, CURLOPT_COOKIEJAR, $this->cookieFile); 
@@ -122,7 +137,9 @@ class HttpRequest {
 	}
 	
 	function respCode() {
+		
 		return $this->respCode;
+		
 	}
 	
 	function __destruct() {
