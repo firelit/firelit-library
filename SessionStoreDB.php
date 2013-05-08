@@ -24,7 +24,7 @@ class SessionStoreDB extends SessionStore {
 		$this->db = $queryObject;
 		
 		// Merge config data with defaults
-		$this->config = array_merge($config, $this->config);
+		self::config($config);
 		
 		$keyName = $this->config['cookie']['name'];
 		
@@ -62,6 +62,12 @@ class SessionStoreDB extends SessionStore {
 		$this->sessionAvail = true;
 		$this->sid = $sid;
 		
+	}
+	
+	public static function config($config) {
+		
+		self::$config = array_merge(self::$config, $config);
+			
 	}
 	
 	public function store($valueArray) {
