@@ -21,11 +21,11 @@ class Crypto {
 	}
 	
 	public static function encrypt($text, $key, $iv) { 
-	    return trim(base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, substr(sha1($key),10,20), $text, MCRYPT_MODE_ECB, base64_decode($iv)))); 
+		return trim(base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, base64_decode($iv)))); 
 	} 
 	
 	public static function decrypt($text, $key, $iv) { 
-	    return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, substr(sha1($key),10,20), base64_decode($text), MCRYPT_MODE_ECB, base64_decode($iv))); 
+		return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, base64_decode($text), MCRYPT_MODE_ECB, base64_decode($iv))); 
 	} 
 
 	public static function password($pswd, $salt = false) {

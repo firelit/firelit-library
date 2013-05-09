@@ -8,6 +8,7 @@ Requirements
 
 - PHP version 5.4.0 and higher
 - MultiByte PHP extension
+- Mcrypt PHP extension (required for `Crypto` class)
 - cURL PHP extension (required for `HttpRequest` class)
 - PDO PHP extension (required for `Query` class)
 - PEAR Mail and Mail mime extensions (required for `EmailSenderSMTP` class)
