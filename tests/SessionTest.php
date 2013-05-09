@@ -2,19 +2,33 @@
 
 class SessionTest extends PHPUnit_Framework_TestCase {
 	
-	private $s, $testVal;
+	private $session, $store, $testVal;
 	
 	protected function setUp() {
 		
-		// TODO - Clean up? Remove database?
-		Firelit\Session::install();
+		$this->testVal = array(
+			'Array of random variables',
+			mt_rand(1, 100000000),
+			mt_rand(1, 100000000),
+			mt_rand(1, 100000000)
+		);
 		
-		$s = new Firelit\Session($_GLOBAL['TestConfig']::$Session);
-		$testVal = mt_rand(1, 100000);
+		$this->store = Firelit\SessionStore::init('PHP');
+		$this->session = new Firelit\Session($store);
+		
 	}
 
-	protected function testSetGet() {
-		$s->test = $testVal;
-		$this->assertEqual($s->test, $testVal);
+	public function testSetGet() {
+		$varName = 'test'. mt_rand(0, 1000);
+		$this->session->$varName = $this->testVal;
+		$this->session->flushCache();
+		$this->assertEqual($this->session->$varName, $this->testVal);
+	}
+	
+	public function testDestroy() {
+		$varName = 'test'. mt_rand(0, 1000);
+		$this->session->$varName = $this->testVal;
+		$this->session->destroy();
+		$this->assertNull($this->session->$varName);
 	}
 }
