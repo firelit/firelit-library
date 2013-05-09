@@ -1,6 +1,6 @@
 <?PHP
 
-namespace 'Firelit';
+namespace Firelit;
 
 class SessionStorePHP extends SessionStore {
 	

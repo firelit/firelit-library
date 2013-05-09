@@ -1,6 +1,6 @@
 <?PHP
 
-namespace 'Firelit';
+namespace Firelit;
 
 class ApiResponseXML extends ApiResponse {
 	

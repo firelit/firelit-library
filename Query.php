@@ -1,8 +1,6 @@
 <?PHP
 
-namespace 'Firelit';
-
-include_once('library.php');
+namespace Firelit;
 
 class Query {
 	// Database connection & interaction class
@@ -39,7 +37,7 @@ class Query {
 		if (!is_array($config)) 
 			throw new \Exception('Database connection configuration not provided.');
 		
-		$this->config = $config;
+		self::$config = $config;
 		
 	}
 	
