@@ -23,6 +23,7 @@ class SessionTest extends PHPUnit_Framework_TestCase {
 		$varName = 'test'. mt_rand(0, 1000);
 		$this->session->$varName = $this->testVal;
 		
+		$this->session->save();
 		$this->session->flushCache();
 		
 		$this->assertEquals($this->session->$varName, $this->testVal);
@@ -35,6 +36,9 @@ class SessionTest extends PHPUnit_Framework_TestCase {
 		$this->session->$varName = $this->testVal;
 		
 		unset($this->session->$varName);
+		
+		$this->session->save();
+		$this->session->flushCache();
 		
 		$this->assertNull($this->session->$varName);
 		
