@@ -6,6 +6,9 @@ class SessionStorePHP extends SessionStore {
 	
 	public function __construct() {
 		
+		if (headers_sent()) 
+			throw new \Exception('Session could not be started because HTTP headers already sent.');
+		
 		session_start();
 		
 	}
@@ -14,10 +17,8 @@ class SessionStorePHP extends SessionStore {
 		// $expireSeconds ignored - session expired handled by php.ini
 		
 		foreach ($valueArray as $key => $val) {
-			if (is_null($val)) {
-				unset($_SESSION[$key]);
+			if (is_null($val)) 
 				unset($valueArray[$key]);
-			}
 		}
 		
 		$_SESSION = $valueArray;

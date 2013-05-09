@@ -78,6 +78,8 @@ class Session {
 	public function flushCache() {
 		
 		$this->cache = array();
+		$this->fetched = false;
+		$this->updatesToSave = false;
 		
 	}
 	
