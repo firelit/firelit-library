@@ -40,6 +40,21 @@ class SessionTest extends PHPUnit_Framework_TestCase {
 		
 	}
 	
+	public function testGetOnlyOnce() {
+	
+		$varName = 'test'. mt_rand(0, 1000);
+		
+		$this->store->expects($this->once())
+					->method('fetch')
+					->will($this->returnValue(array( $varName => $this->testVal)));
+                 
+		$firstGet = $this->session->$varName;
+		
+		// Second get should be from object cache
+		$this->assertEquals($this->session->$varName, $this->testVal);
+		
+	}
+	
 	public function testUnset() {
 	
 		$varName = 'test'. mt_rand(0, 1000);
