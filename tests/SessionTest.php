@@ -6,53 +6,61 @@ class SessionTest extends PHPUnit_Framework_TestCase {
 	
 	protected function setUp() {
 		
-		$this->testVal = array(
-			'Array of random variables',
-			mt_rand(1, 100000000),
-			mt_rand(1, 100000000),
-			mt_rand(1, 100000000)
-		);
+		$this->testVal = 'A test value';
 		
-		$this->store = Firelit\SessionStore::init('Mem');
+		$this->store = $this->getMock('Firelit\SessionStore', array('store', 'fetch', 'destroy'));
+		
 		$this->session = new Firelit\Session($this->store);
 		
 	}
 		
-	public function testSetGet() {
+	public function testSet() {
 	
 		$varName = 'test'. mt_rand(0, 1000);
+		
+		$this->store->expects($this->once())
+					->method('store')
+					->with($this->equalTo(array( $varName => $this->testVal)));
+                 
 		$this->session->$varName = $this->testVal;
 		
 		$this->session->save();
-		$this->session->flushCache();
-		
-		$this->assertEquals($this->session->$varName, $this->testVal);
 		
 	}
 		
+	public function testGet() {
+	
+		$varName = 'test'. mt_rand(0, 1000);
+		
+		$this->store->expects($this->once())
+					->method('fetch')
+					->will($this->returnValue(array( $varName => $this->testVal)));
+                 
+		$this->assertEquals($this->session->$varName, $this->testVal);
+		
+	}
+	
 	public function testUnset() {
 	
 		$varName = 'test'. mt_rand(0, 1000);
-		$this->session->$varName = $this->testVal;
 		
+		$this->store->expects($this->once())
+					->method('store')
+					->with($this->equalTo(array()));
+                 
 		unset($this->session->$varName);
 		
 		$this->session->save();
-		$this->session->flushCache();
-		
-		$this->assertNull($this->session->$varName);
-		
+				
 	}
 	
 	
 	public function testDestroy() {
 	
-		$varName = 'test'. mt_rand(0, 1000);
-		$this->session->$varName = $this->testVal;
-		
+		$this->store->expects($this->once())
+					->method('destroy');
+					
 		$this->session->destroy();
-		
-		$this->assertNull($this->session->$varName);
 		
 	}
 }
