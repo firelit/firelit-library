@@ -7,14 +7,14 @@ class CheckHTTPS {
 	
 	static public function isSecure() {
 		
-		return ($_SERVER["HTTPS"] != "on");
+		return ($_SERVER["HTTPS"] == "on");
 		
 	}
 	
 	static public function redirect($preRedirectFunction = false) {
 		// Force page access by SSL only
 		
-		if (self::isSecure()) {
+		if (!self::isSecure()) {
 			
 			if (is_callable($preRedirectFunction)) {
 				// Pass a closure to do work (eg, log the redirect)
@@ -36,7 +36,7 @@ class CheckHTTPS {
 	
 	static public function error($errorCode = 400, $body = false, $preExitFunction = false) {
 		
-		if (self::isSecure()) {
+		if (!self::isSecure()) {
 			
 			if (is_callable($preExitFunction)) {
 				// Pass a closure to do work (eg, log the redirect)
