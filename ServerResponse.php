@@ -60,17 +60,24 @@ class ServerResponse {
 		
 	}
 	
-	public function flush() {
+	public function flushBuffer() {
 	
 		if ($this->outputBuffering)
 			ob_flush();
 			
 	}
 	
-	public function clean() {
+	public function cleanBuffer() {
 	
 		if ($this->outputBuffering)
 			ob_clean();
+			
+	}
+	
+	public function endBuffer() {
+		// Call cleanBuffer first if you don't want anything getting out
+		if ($this->outputBuffering)
+			ob_end_flush();
 			
 	}
 }
