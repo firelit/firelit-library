@@ -53,16 +53,16 @@ class Strings {
 		
 	}
 
-	public static function cleanUTF8(&$input, $stripSlashes = true, $lineBreaksOk = true) {
+	public static function cleanUTF8(&$input, $lineBreaksOk = true) {
 		// Clean input for UTF-8 valid characters
 		
-		if ($stripSlashes) $stripSlashes = get_magic_quotes_gpc();
+		if (is_array($input)) {
 		
-		if (is_array($input)) 
-			foreach ($input as $k => $v) self::cleanUTF8($input[$k], $stripSlashes, $lineBreaksOk);
-		else {
+			foreach ($input as $k => $v) 
+				self::cleanUTF8($input[$k], $lineBreaksOk);
+		
+		} else {
 			
-			if ($stripSlashes) $input = stripslashes($input);
 			$input = mb_convert_encoding($input, "UTF-8", "UTF-8");
 			if ($lineBreaksOk) $input = preg_replace('![\x00-\x09\x0B\x0C\x0E-\x1F\x7F-\x9F]!', '', $input);
 			else $input = preg_replace('!\p{C}!u', '', $input);
