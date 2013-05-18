@@ -1,6 +1,6 @@
 <?PHP
 
-namespace "Firelit";
+namespace Firelit;
 
 class CheckHTTPS {
 	// Check to see if the connection is secure, and if not perform an action

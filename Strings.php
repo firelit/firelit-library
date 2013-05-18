@@ -1,5 +1,7 @@
 <?PHP
 
+namespace Firelit;
+
 class Strings {
 	
 	public static function validEmail($emailAddy) {
