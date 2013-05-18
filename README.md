@@ -223,6 +223,14 @@ while ($row = $q->getRow())
 	echo $row['name'] .': '. $row['state'] .'<br>';
 ```
 
+### ServerRequest
+
+A class that captures the incoming HTTP request in a single object and performs any necessary preliminary work. Provides a nice wrapper around all the important parameters within the request.
+
+### ServerResponse
+
+A class that manages the server's response to an incoming requests. Defaults to buffering output. Includes helper functions which make changing the HTTP response code and performing a redirect much easier.
+
 ### Session
 
 Session management class which can use PHP's native session features or a database. You can get and set any property name to the session object and it is dynamically saved (using magic getter and setter methods). The abstract method SessionStore defines how the session system stores and retrieves the data. This library provides database and PHP versions of the SessionStore class. Roll your own by extending SessionStore and use a class of this object when instantiating the Session object. Sessions are saved all at once at session object `__destruct` or when the `save()` method is explicitly called.
