@@ -12,7 +12,7 @@ class ServerRequest {
 		
 		$this->method = $_SERVER['REQUEST_METHOD'];
 		$this->path = $_SERVER['REQUEST_URI'];
-		$this->secure = ($_SERVER['HTTPS'] == 'on');
+		$this->secure = isset($_SERVER['HTTPS']) ? ($_SERVER['HTTPS'] == 'on') : false;
 		$this->host = $_SERVER['HTTP_HOST'];
 		$this->referer = $_SERVER['HTTP_REFERER'];
 		$this->cli = (php_sapi_name() == 'cli');
