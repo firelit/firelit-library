@@ -10,11 +10,11 @@ class ServerRequest {
 
 	public function __construct() { 
 		
-		$this->method = $_SERVER['REQUEST_METHOD'];
-		$this->path = $_SERVER['REQUEST_URI'];
+		$this->method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : false;
+		$this->path = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : false;
 		$this->secure = isset($_SERVER['HTTPS']) ? ($_SERVER['HTTPS'] == 'on') : false;
-		$this->host = $_SERVER['HTTP_HOST'];
-		$this->referer = $_SERVER['HTTP_REFERER'];
+		$this->host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : false;
+		$this->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : false;
 		$this->cli = (php_sapi_name() == 'cli');
 		
 		$this->post = $_POST;
