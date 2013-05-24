@@ -4,9 +4,9 @@ namespace Firelit;
 
 abstract class ApiResponse extends InitExtendable {
 	
-	private $code = 200;
-	private $response = array();
-	private $responseSent = false;
+	protected $code = 200;
+	protected $response = array();
+	protected $responseSent = false;
 	
 	static $responseType = false;
 	static $responseObject;
