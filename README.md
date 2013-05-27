@@ -11,6 +11,7 @@ Requirements
 - Mcrypt PHP extension (required for `Crypto` class)
 - cURL PHP extension (required for `HttpRequest` class)
 - PDO PHP extension (required for `Query` class)
+- SQLite PHP extension (required for `Query` class unit tests)
 - PEAR Mail and Mail mime extensions (required for `EmailSenderSMTP` class)
 
 Classes Included
