@@ -74,7 +74,7 @@ class Query {
 			
 		} catch (PDOException $e) {
 			
-			throw new Exception('Unable to connect to database: '. $e->getMessage());
+			throw new \Exception('Unable to connect to database: '. $e->getMessage());
 			
 		}
 		
@@ -87,12 +87,13 @@ class Query {
 		// Pass $sql statement and $data to bind with the $keys matching placeholders (see PDO prepare docs for details)
 		// Example: query( "SELECT * FROM `table` WHERE `col`=:theval", array(':theval' => 'Hello!') )
 		
-		$binder = array();
-		foreach ($data as $col => &$val) // By reference for db driver purposes
-			$binder[(preg_match('/^:/', $col) ? '' : ':') . $col] = $val; 
+		$binder = $this->binderPrep($data);
 		
 		$this->sql = self::$conn->prepare($sql);
 		
+		if (!$this->sql)
+			throw new \Exception('Statement could no be prepared for database: '. print_r(self::$conn->errorInfo(), true));
+			
 		return $this->res = $this->sql->execute($binder);
 		
 	}
@@ -102,13 +103,14 @@ class Query {
 		// Enter an associative array for $array with column names as keys
 		
 		if (!preg_match(self::$validTableName, $table)) 
-			throw new Exception('Invalid database table name specified.');
+			throw new \Exception('Invalid database table name specified.');
 		
 		$this->sql = self::$conn->prepare("INSERT INTO `". $table ."` ". self::prepInsert($array));
 		
-		$binder = array();
-		foreach ($array as $col => &$val) // By reference for db driver purposes
-			$binder[(preg_match('/^:/', $col) ? '' : ':').$col] = $val;
+		if (!$this->sql)
+			throw new \Exception('Statement could no be prepared for database: '. print_r(self::$conn->errorInfo(), true));
+			
+		$binder = $this->binderPrep($array);
 		
 		return $this->res = $this->sql->execute($binder);
 		
@@ -119,13 +121,11 @@ class Query {
 		// Enter an associative array for $array with column names as keys
 		
 		if (!preg_match(self::$validTableName, $table)) 
-			throw new Exception('Invalid database table name specified.');
+			throw new \Exception('Invalid database table name specified.');
 		
 		$this->sql = self::$conn->prepare("REPLACE INTO `". $table ."` ". self::prepInsert($array));
 		
-		$binder = array();
-		foreach ($array as $col => &$val) // By reference for db driver purposes
-			$binder[(preg_match('/^:/', $col) ? '' : ':').$col] = $val;
+		$binder = $this->binderPrep($array);
 		
 		return $this->res = $this->sql->execute($binder);
 		
@@ -139,7 +139,7 @@ class Query {
 		// $limit and $range should be integers used as SQL LIMIT
 		
 		if (!preg_match(self::$validTableName, $table)) 
-			throw new Exception('Invalid database table name specified.');
+			throw new \Exception('Invalid database table name specified.');
 		
 		if (is_array($select) && sizeof($select)) {
 			
@@ -148,7 +148,7 @@ class Query {
 			foreach ($select as $col) {
 				
 				if (!preg_match(self::$validColName, $col)) 
-					throw new Exception('Invalid database column name specified.');
+					throw new \Exception('Invalid database column name specified.');
 				
 				$selectSql .= ', `'. $select .'`';
 				
@@ -167,9 +167,7 @@ class Query {
 		
 		$this->sql = self::$conn->prepare($sql);
 		
-		$binder = array();
-		foreach ($whereData as $col => &$val) // By reference for db driver purposes
-			$binder[(preg_match('/^:/', $col) ? '' : ':').$col] = $val; 
+		$binder = $this->binderPrep($whereData);
 		
 		return $this->res = $this->sql->execute($binder);
 		
@@ -182,21 +180,17 @@ class Query {
 		// $where placeholders (referenced in $whereData) cannot be column names used in the $array
 		
 		if (!preg_match(self::$validTableName, $table)) 
-			throw new Exception('Invalid database table name specified.');
+			throw new \Exception('Invalid database table name specified.');
 		
 		if (sizeof(array_intersect_key($array, $whereData)))
-			throw new Exception('Conflicting parameter names for binding.');
+			throw new \Exception('Conflicting parameter names for binding.');
 		
 		$this->sql = self::$conn->prepare("UPDATE `". $table ."` SET ". self::prepUpdate($array) ." WHERE ". $where);
 		
-		$binder = array();
+		$binder = $this->binderPrep($array);
 		
-		foreach ($array as $col => &$val) // By reference for db driver purposes
-			$binder[':'.$col] = $val;
+		$binder = $this->binderPrep($whereData, $binder);
 		
-		foreach ($whereData as $col => &$val) // By reference for db driver purposes
-			$binder[(preg_match('/^:/', $col) ? '' : ':').$col] = $val; 
-			
 		return $this->res = $this->sql->execute($binder);
 		
 	}
@@ -206,7 +200,7 @@ class Query {
 		// Enter $whereData as associative array with data to be escaped and inserted into where clause (see PDO prepare docs for details)
 		
 		if (!preg_match(self::$validTableName, $table)) 
-			throw new Exception('Invalid database table name specified.');
+			throw new \Exception('Invalid database table name specified.');
 		
 		$sql = "DELETE FROM `". $table ."` WHERE ". $where;
 		
@@ -217,12 +211,20 @@ class Query {
 		
 		$this->sql = self::$conn->prepare($sql);
 		
-		$binder = array();
-		
-		foreach ($whereData as $col => &$val) // By reference for db driver purposes
-			$binder[(preg_match('/^:/', $col) ? '' : ':').$col] = $val; 
+		$binder = $this->binderPrep($whereData);
 		
 		return $this->res = $this->sql->execute($binder);
+		
+	}
+	
+	protected function binderPrep(&$array, $binderIn = false) {
+		
+		$binder = ($binderIn ? $binderIn : array());
+		
+		foreach ($array as $col => &$val) // By reference for db driver purposes
+			$binder[(preg_match('/^:/', $col) ? '' : ':') . $col] = $val; 
+		
+		return $binder;
 		
 	}
 	
@@ -285,7 +287,7 @@ class Query {
 		foreach ($array as $col => $val) {
 			
 			if (!preg_match(self::$validColName, $col)) 
-				throw new Exception('Invalid database column name specified.');
+				throw new \Exception('Invalid database column name specified.');
 			
 			$sql1 .= ', `'. $col .'`';
 			
@@ -304,14 +306,14 @@ class Query {
 		// Prepare an UPDATE SQL statement ready for a data bind
 		
 		if (!is_array($array)) 
-			throw new Exception('Method expects an array.');
+			throw new \Exception('Method expects an array.');
 	
 		$sql = '';
 		
 		foreach ($array as $col => $val) {
 			
 			if (!preg_match(self::$validColName, $col)) 
-				throw new Exception('Invalid database column name specified.');
+				throw new \Exception('Invalid database column name specified.');
 			
 			$sql .= ', `'. $col .'` = :'. $col;
 			
