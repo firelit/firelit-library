@@ -231,6 +231,29 @@ while ($row = $q->getRow())
 	echo $row['name'] .': '. $row['state'] .'<br>';
 ```
 
+Use the config method to setup the database connection:
+- `config( $configArray );`
+
+Available methods for building and executing queries:
+- `query( $sql, [ $dataArray ]);`
+- `insert( $tableName, $dataArray );`
+- `replace( $tableName, $dataArray );`
+- `select( $tableName, [ $selectFieldsArray, [ $whereStatement, [ $whereDataArray, [ $limit, [ $range ]]]]] );`
+- `update( $tableName, $dataArray, $whereStatement, [ $whereDataArray, [ $limit, [ $range ]]] );`
+- `delete( $tableName, $whereStatement, [ $whereDataArray, [ $limit, [ $range ]]] );`
+
+Available methods for getting the status and/or results of a query:
+- `getRes();` returns true if the query was successfully executed
+- `getRow();` returns the next data row from a successful select query
+- `getAll();` returns all the data rows from a successful select query
+- `getNewId();` returns the new ID from newly-inserted data row
+- `getAffected();` returns the number of rows affected by the query
+- `getNumRows();` returns the number of data rows returned by a select query
+- `getError();` returns the error message
+- `getErrorCode();` returns the error code
+- `success();` returns true if the query was successfully executed
+- `logError(LogEntry $logger, $file, $line);` is a helper method for logging any query errors
+
 ### ServerRequest
 
 A class that captures the incoming HTTP request in a single object and performs any necessary preliminary work. Provides a nice wrapper around all the important parameters within the request.

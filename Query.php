@@ -78,8 +78,8 @@ class Query {
 			
 		}
 		
-  	return self::$conn;
-  	
+		return self::$conn;
+		
 	}
 	
 	public function query($sql, $data = array()) {

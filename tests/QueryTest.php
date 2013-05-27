@@ -36,6 +36,19 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		
 	}
 	
+	public function testReplace() {
+		
+		$this->q->replace('Tester', array(
+			'name' => 'Sally',
+			'date' => array('SQL', "DATETIME('now')"),
+			'state' => false
+		));
+		
+		$this->assertTrue( $q->success() );
+		
+		
+	}
+	
 	protected function tearDown() {
 		
 		$this->q->query("DROP TABLE `Tester`");
