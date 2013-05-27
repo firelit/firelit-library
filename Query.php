@@ -26,11 +26,20 @@ class Query {
 		
 		/*
 			Expects an associative array:
+			
 			$config = array(
+				'type' => 'mysql',
 				'db_name' => 'database',
 				'db_ip' => 'localhost',
 				'db_user' => 'username',
 				'db_pass' => 'password'
+			);
+			
+			-OR-
+			
+			$config = array(
+				'type' => 'other',
+				'dsn' => 'sqlite::memory'
 			);
 		*/
 		
@@ -45,13 +54,23 @@ class Query {
 		
 		if (!$this->config) 
 			throw new \Exception('Database connection configuration not provided.');
-		
-		
-		$dsn = 'mysql:dbname='. $this->config['db_name'] .';host='. $this->config['db_ip'];
-		
+				
 		try {
 			
-			self::$conn = new PDO($dsn, $this->config['db_user'], $this->config['db_pass'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
+			if ($this->config['type'] == 'other') {
+				
+				self::$conn = new PDO($this->config['dsn']);
+				
+			} elseif ($this->config['type'] == 'mysql') {
+				
+				$dsn = 'mysql:dbname='. $this->config['db_name'] .';host='. $this->config['db_ip'];
+				self::$conn = new PDO($dsn, $this->config['db_user'], $this->config['db_pass'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
+				
+			} else {
+			
+				throw new \Exception('Invalid database type specified in config.');
+				
+			}
 			
 		} catch (PDOException $e) {
 			

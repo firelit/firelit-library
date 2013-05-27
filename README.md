@@ -201,10 +201,17 @@ Example usage:
 
 // One-time connection setup
 Firelit\Query::config(array(
+	'type' => 'mysql',
 	'db_name' => 'database',
 	'db_ip' => 'localhost',
 	'db_user' => 'username',
 	'db_pass' => 'password'
+));
+
+// Or specify the DSN string for PDO to connect to other types of databases
+Firelit\Query::config(array(
+	'type' => 'other',
+	'dsn' => 'sqlite::memory'
 ));
 
 $q = new Firelit\Query();
