@@ -52,19 +52,19 @@ class Query {
 	
 	public static function connect() {
 		
-		if (!$this->config) 
+		if (!self::$config) 
 			throw new \Exception('Database connection configuration not provided.');
 				
 		try {
 			
-			if ($this->config['type'] == 'other') {
+			if (self::$config['type'] == 'other') {
 				
-				self::$conn = new PDO($this->config['dsn']);
+				self::$conn = new \PDO(self::$config['dsn']);
 				
-			} elseif ($this->config['type'] == 'mysql') {
+			} elseif (self::$config['type'] == 'mysql') {
 				
-				$dsn = 'mysql:dbname='. $this->config['db_name'] .';host='. $this->config['db_ip'];
-				self::$conn = new PDO($dsn, $this->config['db_user'], $this->config['db_pass'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
+				$dsn = 'mysql:dbname='. self::$config['db_name'] .';host='. self::$config['db_ip'];
+				self::$conn = new \PDO($dsn, self::$config['db_user'], self::$config['db_pass'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
 				
 			} else {
 			
@@ -82,13 +82,13 @@ class Query {
   	
 	}
 	
-	public function query($sql, $data) {
+	public function query($sql, $data = array()) {
 		// Execute the SQL query
 		// Pass $sql statement and $data to bind with the $keys matching placeholders (see PDO prepare docs for details)
 		// Example: query( "SELECT * FROM `table` WHERE `col`=:theval", array(':theval' => 'Hello!') )
 		
 		$binder = array();
-		foreach ($array as $col => &$val) // By reference for db driver purposes
+		foreach ($data as $col => &$val) // By reference for db driver purposes
 			$binder[(preg_match('/^:/', $col) ? '' : ':') . $col] = $val; 
 		
 		$this->sql = self::$conn->prepare($sql);
