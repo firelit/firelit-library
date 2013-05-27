@@ -7,14 +7,17 @@ class ApiResponseXML extends ApiResponse {
 	private $xmlNameSpace = '';
 	private $xmlRootNode = '';
 	
+	public function __construct() {
+		parent::__construct();
+		$this->contentType('text/xml');
+	}
+	
 	public function setup($xmlRootNode = 'response', $xmlNameSpace = '') {
 		$this->xmlNameSpace = $xmlNameSpace;
 		$this->xmlRootNode = $xmlRootNode;
 	}
 	
 	public function respond($response = array(), $end = false) {
-		
-		if (!headers_sent()) header('Content-type: text/xml; charset=utf-8');
 		
 		parent::respond($response, $end);
 		

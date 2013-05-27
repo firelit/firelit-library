@@ -2,16 +2,18 @@
 
 namespace Firelit;
 
-abstract class ApiResponse extends InitExtendable {
+abstract class ApiResponse extends ServerResponse {
 	
-	private $code = 200;
-	private $response = array();
-	private $responseSent = false;
+	protected $code = 200;
+	protected $response = array();
+	protected $responseSent = false;
 	
 	static $responseType = false;
 	static $responseObject;
 	
-	public function __construct() { }
+	public function __construct() { 
+		parent::__construct();
+	}
 	
 	public function setTemplate($template) {
 		$this->response = array_merge($this->response, $template);	
@@ -19,10 +21,6 @@ abstract class ApiResponse extends InitExtendable {
 	
 	public function set($response) {
 		$this->response = array_merge($this->response, $response);	
-	}
-	
-	public function code($code) {
-		$this->code = (int) $code;	
 	}
 	
 	public function respondAndEnd($response = array()) {

@@ -236,7 +236,7 @@ A class that captures the incoming HTTP request in a single object and performs 
 
 ### ServerResponse
 
-A class that manages the server's response to an incoming requests. Defaults to buffering output. Includes helper functions which make changing the HTTP response code and performing a redirect much easier.
+A class that manages the server's response to an incoming requests. Defaults to buffering output. Includes helper functions which make changing the HTTP response code and performing a redirect much easier. Note that the ApiResponse class inherits from this class to make use of its response management.
 
 ### Session
 
