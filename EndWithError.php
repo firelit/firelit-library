@@ -5,6 +5,7 @@ namespace Firelit;
 class EndWithError {
 	
 public static $errorTemplate = <<<EOT
+	<!DOCTYPE HTML>
 	<html><head><title>{{title}}</title></head>
 	<body style="background-color:#D9D9D9;"><div style="width:500px;margin:40px auto;padding:20px 40px;border:10px solid #737382;background-color:white;color:#474750;font-family:arial;border-radius:10px;box-shadow: 0 3px 5px 5px #B9B9B9;">
 		<h1 style="font-size:1em;">{{header}}</h1>
