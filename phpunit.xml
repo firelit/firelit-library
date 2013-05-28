@@ -1,2 +1,7 @@
 <phpunit bootstrap="tests/bootstrap.php">
+	<testsuites>
+        <testsuite name="Firelit Library Test Suite">
+            <directory>./tests/</directory>
+        </testsuite>
+    </testsuites>
 </phpunit>
