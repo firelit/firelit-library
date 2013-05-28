@@ -32,7 +32,7 @@ Here is an example `composer.json` that you could add to your project root:
         }
     ],
     "require": {
-        "firelit/library": "master" /* It would be better to specify a version here */
+        "firelit/library": "dev-master" /* It would be better to specify a version here */
     }
 }
 ```
