@@ -27,6 +27,9 @@ class Cache {
 	
 	public static function get($name, $closure = false) {
 		
+		if (!is_string($name))
+			throw new \Exception('Cache key must be a string.');
+			
 		// First check php-memory cache
 		if (isset(self::$cache[$name])) {
 			
