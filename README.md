@@ -14,6 +14,29 @@ Requirements
 - SQLite PHP extension (required for `Query` class unit tests)
 - PEAR Mail and Mail mime extensions (required for `EmailSenderSMTP` class)
 
+How to Use
+----------
+
+The easiest way to use this library is to use [Composer](http://getcomposer.org/) which automatically handles dependencies and auto-loading.
+
+Here is an example `composer.json` that you could add to your project root:
+```js
+{
+    "name": "acme/blog", /* Your package name */
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/firelit/firelit-library"
+        }
+    ],
+    "require": {
+        "firelit/library": "master"
+    }
+}
+```
+
+Alternatively, you could go the manual way and setup your own autoloader and copy the project files from `lib/` into your project directory.
+
 Classes Included
 ----------------
 
