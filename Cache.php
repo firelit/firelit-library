@@ -19,13 +19,13 @@ class Cache {
 	
 	public function __construct() { }	
 
-	public static config($config) {
+	public static function config($config) {
 		
 		self::$config = array_merge(self::$config, $config);
 			
 	}
 	
-	public static get($name, $closure = false) {
+	public static function get($name, $closure = false) {
 		
 		// First check php-memory cache
 		if (isset(self::$cache[$name])) {
@@ -86,7 +86,7 @@ class Cache {
 		
 	}
 	
-	public static memcachedConnect() {
+	public static function memcachedConnect() {
 		
 		if (self::$memcached) return;
 		
