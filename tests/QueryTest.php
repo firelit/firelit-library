@@ -53,14 +53,25 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 	 * @depends testReplace
 	 */
 	public function testSelect() {
-		
-		$this->q->select('Tester', '*', '`name`=:name', array( ':name' => 'Sally' ), 1, 1);
+
+		$this->q->insert('Tester', array(
+			'name' => 'Sally',
+			'date' => array('SQL', "DATETIME('now')"),
+			'state' => true
+		));
+
+		$this->q->select('Tester', '*', '`name`=:name', array( 'name' => 'Sally' ), 1, 1);
 		
 		$this->assertTrue( $this->q->success() );
+
+		$this->assertTrue( $this->q->getNumRows() === 1 );
+
+// TODO
+var_dump($this->q->getRow());
 		
 		$rows = $this->q->getAll();
 		
-		$this->assertTrue( sizeof($rows) == 1 );
+		$this->assertTrue( sizeof($rows) === 1 );
 		
 		$this->assertEquals( $rows[0]['name'] == 'Sally');
 		

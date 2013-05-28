@@ -166,7 +166,10 @@ class Query {
 		}
 		
 		$this->sql = self::$conn->prepare($sql);
-		
+
+		if (!$this->sql)
+			throw new \Exception('Query statement could not be prepared: '. print_r(self::$conn->errorInfo(), true));
+			
 		$binder = $this->binderPrep($whereData);
 		
 		return $this->res = $this->sql->execute($binder);
@@ -187,6 +190,9 @@ class Query {
 		
 		$this->sql = self::$conn->prepare("UPDATE `". $table ."` SET ". self::prepUpdate($array) ." WHERE ". $where);
 		
+		if (!$this->sql)
+			throw new \Exception('Query statement could not be prepared: '. print_r(self::$conn->errorInfo(), true));
+			
 		$binder = $this->binderPrep($array);
 		
 		$binder = $this->binderPrep($whereData, $binder);
@@ -211,6 +217,9 @@ class Query {
 		
 		$this->sql = self::$conn->prepare($sql);
 		
+		if (!$this->sql)
+			throw new \Exception('Query statement could not be prepared: '. print_r(self::$conn->errorInfo(), true));
+			
 		$binder = $this->binderPrep($whereData);
 		
 		return $this->res = $this->sql->execute($binder);
