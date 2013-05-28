@@ -4,25 +4,32 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 	
 	protected $q, $res;
 	
-	protected function setUp() {
-		
+	public static function setUpBeforeClass() {
+	
 		Firelit\Query::config(array(
 			'type' => 'other',
 			'dsn' => 'sqlite::memory'
 		));
 		
-		$this->q = new Firelit\Query();
-		$this->res = $this->q->query("CREATE TABLE IF NOT EXISTS `Tester` (`id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, `name` TINYTEXT, `date` DATETIME, `state` BOOL)");
-		
 	}
 	
+	protected function setUp() {
+		
+		$this->q = new Firelit\Query();
+		
+	}
+
 	public function testQuery() {
 		
-		// If setup() worked (and the query used there), then this will pass!
+		
+		$this->res = $this->q->query("CREATE TABLE IF NOT EXISTS `Tester` (`name` VARCHAR(10) PRIMARY KEY, `date` DATETIME, `state` BOOL)");
 		$this->assertTrue($this->res);
 		
 	}
 	
+	/**
+	* @depends testQuery
+	*/
 	public function testInsert() {
 		
 		$this->q->insert('Tester', array(
@@ -32,10 +39,14 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		));
 		
 		$this->assertTrue( $this->q->success() );
+		$this->assertEquals( 1, $this->q->getAffected() );
 		
 		
 	}
 	
+	/**
+	* @depends testQuery
+	*/
 	public function testReplace() {
 		
 		$this->q->replace('Tester', array(
@@ -45,42 +56,74 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		));
 		
 		$this->assertTrue( $this->q->success() );
+		$this->assertEquals( 1, $this->q->getAffected() );
 		
 		
 	}
 	
 	/**
-	 * @depends testReplace
-	 */
+	* @depends testReplace
+	*/
 	public function testSelect() {
 
-		$this->q->insert('Tester', array(
-			'name' => 'Sally',
-			'date' => array('SQL', "DATETIME('now')"),
-			'state' => true
-		));
+		$this->q->select('Tester', '*', '`name`=:name', array( ':name' => 'Sally' ), 0, 1);
 
-		$this->q->select('Tester', '*', '`name`=:name', array( 'name' => 'Sally' ), 1, 1);
-		
 		$this->assertTrue( $this->q->success() );
 
-		$this->assertTrue( $this->q->getNumRows() === 1 );
-
-// TODO
-var_dump($this->q->getRow());
-		
 		$rows = $this->q->getAll();
 		
-		$this->assertTrue( sizeof($rows) === 1 );
+		$this->assertEquals( 1, sizeof($rows) );
 		
-		$this->assertEquals( $rows[0]['name'] == 'Sally');
-		
-	}
-	
-	protected function tearDown() {
-		
-		$this->q->query("DROP TABLE `Tester`");
+		$this->assertEquals( 'Sally', $rows[0]['name'] );
 		
 	}
 	
+	/**
+	* @depends testInsert
+	*/
+	public function testUpdate() {
+		
+		$this->q->update('Tester', array( 'state' => true ), '`name`=:name', array( ':name' => 'John' ));
+		
+		$this->assertTrue( $this->q->success() );
+		$this->assertEquals( 1, $this->q->getAffected() );
+		
+		// Verify that data was written
+		$this->q->select('Tester', '`state`', '`name`=:name', array( ':name' => 'John' ));
+
+		$this->assertTrue( $this->q->success() );
+
+		$row = $this->q->getRow();
+		
+		$this->assertEquals( true, $row['state'] );
+		
+	}
+	
+	/**
+	* @depends testUpdate
+	*/
+	public function testDelete() {
+		
+		$this->q->delete('Tester', '`name`=:name', array( ':name' => 'John' ), 1);
+		
+		$this->assertTrue( $this->q->success() );
+		$this->assertEquals( 1, $this->q->getAffected() );
+		
+		// Verify that data was deleted
+		$this->q->select('Tester', '*', '`name`=:name', array( ':name' => 'John' ));
+
+		$this->assertTrue( $this->q->success() );
+
+		$row = $this->q->getRow();
+		
+		$this->assertFalse( $row );
+		
+	}
+	
+	public static function tearDownAfterClass() {
+		
+		$q = new Firelit\Query();
+		$q->query("DROP TABLE `Tester`");
+		
+	}
 }

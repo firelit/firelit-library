@@ -248,7 +248,7 @@ Available methods for getting the status and/or results of a query:
 - `getAll();` returns all the data rows from a successful select query
 - `getNewId();` returns the new ID from newly-inserted data row
 - `getAffected();` returns the number of rows affected by the query
-- `getNumRows();` returns the number of data rows returned by a select query
+- `getNumRows();` returns the number of data rows returned by a select query (not reliable for all databases)
 - `getError();` returns the error message
 - `getErrorCode();` returns the error code
 - `success();` returns true if the query was successfully executed

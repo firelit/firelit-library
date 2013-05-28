@@ -256,10 +256,12 @@ class Query {
 	}
 	
 	public function getAffected() {
-		return self::$conn->rowCount();
+		return $this->sql->rowCount();
 	}
 	
 	public function getNumRows() {
+		// May not always return the correct number of rows
+		// See note at http://php.net/manual/en/pdostatement.rowcount.php
 		return $this->sql->rowCount();
 	}
 	
