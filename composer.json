@@ -10,4 +10,12 @@
     "autoload": {
         "psr-0": { "Firelit": "lib/" }
     }
+    "authors": [
+		{
+			"name": "Eric Bigoness",
+			"email": "eric.bigoness@firelit.com",
+			"homepage": "http://www.firelit.com",
+			"role": "Developer"
+		}
+	]
 }
