@@ -367,7 +367,7 @@ if ($vars->maintenanceMode) die('Sorry, under construction.');
 Auto-Loader Example
 -------------------
 
-The beauty of the auto-loader is that it will only load & parse PHP files that it needs. To use it, however, you must define an autoloader function. Here is one exmaple that could be used, created by the [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md) Framework Interop Group:
+The beauty of the auto-loader is that it will only load & parse PHP files that it needs. To use it, however, you must define an autoloader function. (Composer)[http://getcomposer.org/] normally handels this, but if you are using this library without composer here is an exmaple autoloader that could be used, created by the [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md) Framework Interop Group:
 
 ```php
 <?php
