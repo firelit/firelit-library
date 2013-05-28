@@ -1,0 +1,12 @@
+{
+    "name": "firelit/library",
+    "type": "library",
+    "description": "Common library for Firelit projects",
+    "license": "MIT",
+    "require": {
+		"php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-0": { "Firelit": "lib/" }
+    }
+}
