@@ -1,7 +1,9 @@
 Firelit-Library
 ===============
 
-Firelit's standard PHP library provides a set of helpful classes for developing a website. The are created so that they can easily be used with an auto-loader, following the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
+Firelit's standard PHP library provides a set of helpful classes for developing a website. The are created and namespaced so that they can easily be used with an auto-loader, following the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
+
+**NOTE: This project is a WIP and is not versioned because it is not yet complete. All tests have not yet been written and thus all classes have not yet been tested.**
 
 Requirements
 ------------
