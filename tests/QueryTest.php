@@ -16,9 +16,9 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		
 	}
 	
-	public function testConstructor() {
+	public function testQuery() {
 		
-		// If setup() worked, then this will pass!
+		// If setup() worked (and the query used there), then this will pass!
 		$this->assertTrue($this->res);
 		
 	}
@@ -31,7 +31,7 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 			'state' => false
 		));
 		
-		$this->assertTrue( $q->success() );
+		$this->assertTrue( $this->q->success() );
 		
 		
 	}
@@ -41,11 +41,28 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 		$this->q->replace('Tester', array(
 			'name' => 'Sally',
 			'date' => array('SQL', "DATETIME('now')"),
-			'state' => false
+			'state' => true
 		));
 		
-		$this->assertTrue( $q->success() );
+		$this->assertTrue( $this->q->success() );
 		
+		
+	}
+	
+	/**
+	 * @depends testReplace
+	 */
+	public function testSelect() {
+		
+		$this->q->select('Tester', '*', '`name`=:name', array( ':name' => 'Sally' ), 1, 1);
+		
+		$this->assertTrue( $this->q->success() );
+		
+		$rows = $this->q->getAll();
+		
+		$this->assertTrue( sizeof($rows) == 1 );
+		
+		$this->assertEquals( $rows[0]['name'] == 'Sally');
 		
 	}
 	

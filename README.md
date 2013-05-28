@@ -256,7 +256,7 @@ Available methods for getting the status and/or results of a query:
 
 ### ServerRequest
 
-A class that captures the incoming HTTP request in a single object and performs any necessary preliminary work. Provides a nice wrapper around all the important parameters within the request.
+A class that captures the incoming HTTP request in a single object and performs any necessary preliminary work. Provides a nice class wrapper around all the important, sanitized parameters within the request.
 
 ### ServerResponse
 

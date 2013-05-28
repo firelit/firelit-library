@@ -92,7 +92,7 @@ class Query {
 		$this->sql = self::$conn->prepare($sql);
 		
 		if (!$this->sql)
-			throw new \Exception('Statement could no be prepared for database: '. print_r(self::$conn->errorInfo(), true));
+			throw new \Exception('Query statement could not be prepared: '. print_r(self::$conn->errorInfo(), true));
 			
 		return $this->res = $this->sql->execute($binder);
 		
@@ -108,7 +108,7 @@ class Query {
 		$this->sql = self::$conn->prepare("INSERT INTO `". $table ."` ". self::prepInsert($array));
 		
 		if (!$this->sql)
-			throw new \Exception('Statement could no be prepared for database: '. print_r(self::$conn->errorInfo(), true));
+			throw new \Exception('Query statement could not be prepared: '. print_r(self::$conn->errorInfo(), true));
 			
 		$binder = $this->binderPrep($array);
 		
@@ -219,7 +219,7 @@ class Query {
 	
 	protected function binderPrep(&$array, $binderIn = false) {
 		
-		$binder = ($binderIn ? $binderIn : array());
+		$binder = (is_array($binderIn) ? $binderIn : array());
 		
 		foreach ($array as $col => &$val) // By reference for db driver purposes
 			$binder[(preg_match('/^:/', $col) ? '' : ':') . $col] = $val; 
@@ -234,12 +234,12 @@ class Query {
 	
 	public function getRow() {
 		if (!$this->res) return false;
-		return $this->sql->fetch(PDO::FETCH_ASSOC);
+		return $this->sql->fetch(\PDO::FETCH_ASSOC);
 	}
 	
 	public function getAll() {
 		if (!$this->res) return false;
-		return $this->sql->fetchAll(PDO::FETCH_ASSOC);
+		return $this->sql->fetchAll(\PDO::FETCH_ASSOC);
 	}
 	
 	public function getNewId() {
@@ -275,7 +275,7 @@ class Query {
 		return $this->res;
 	}
 	
-	public static function prepInsert($array) {
+	public static function prepInsert(&$array) {
 		// Prepare an INSERT SQL statement ready for a data bind
 		
 		if (!is_array($array)) 
@@ -291,10 +291,12 @@ class Query {
 			
 			$sql1 .= ', `'. $col .'`';
 			
-			if (is_array($val) && ($val[0] == 'SQL'))
+			if (is_array($val) && ($val[0] == 'SQL')) {
 				$sql2 .= ", ". $val[1];
-			else
+				unset($array[$col]); // Remove it so that it's not added to the binder
+			} else {
 				$sql2 .= ", :". $col;
+			}
 			
 		}
 		
@@ -302,7 +304,7 @@ class Query {
 			
 	}
 	
-	public static function prepUpdate($array) {
+	public static function prepUpdate(&$array) {
 		// Prepare an UPDATE SQL statement ready for a data bind
 		
 		if (!is_array($array)) 
@@ -315,7 +317,12 @@ class Query {
 			if (!preg_match(self::$validColName, $col)) 
 				throw new \Exception('Invalid database column name specified.');
 			
-			$sql .= ', `'. $col .'` = :'. $col;
+			if (is_array($val) && ($val[0] == 'SQL')) {
+				$sql .= ', `'. $col .'` = '. $val[1];
+				unset($array[$col]); // Remove it so that it's not added to the binder
+			} else {
+				$sql .= ', `'. $col .'` = :'. $col;
+			}
 			
 		}
 		
