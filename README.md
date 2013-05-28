@@ -39,6 +39,34 @@ $resp->respondAndEnd(array(
 ));
 ```
 
+### Cache
+
+A caching class. First uses php-memory cache (a global PHP variable) and configurable to use memcached second. The static variables `$cacheHit` and `$cacheMiss` are set after each cache check.
+
+Example usage:
+```php
+<?php
+
+Firelit\Cache::config(array(
+	'memcached' => array(
+		'enabled' => true,
+		'servers' => array(
+			array('cache.example.com', 11211, 33)
+		)
+	)
+));
+
+$val = Firelit\Cache::get('randomValue', function() {
+
+	// If cache miss, this closure will retrieve and return the value
+	return mt_rand(0, 1000);
+	
+});
+
+if (Firelit\Cache::$cacheHit) 
+	echo 'Cache hit!';
+```
+
 ### CheckHTTPS
 
 A short class to help verify a connection is secure (ie, using TLS) and take action (ie, redirect or return error) if it isn't. It would be best if this were done via the web server settings but this isn't always possible.
