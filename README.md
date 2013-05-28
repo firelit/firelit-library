@@ -3,6 +3,8 @@ Firelit-Library
 
 Firelit's standard PHP library provides a set of helpful classes for developing a website. The are created and namespaced so that they can easily be used with an auto-loader, following the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
 
+**Not production ready!**
+
 **NOTE: This project is a WIP and is not versioned because it is not yet complete. All tests have not yet been written and thus all classes have not yet been tested.**
 
 Requirements
@@ -257,7 +259,8 @@ Example usage:
 Firelit\Query::config(array(
 	'type' => 'mysql',
 	'db_name' => 'database',
-	'db_ip' => 'localhost',
+	'db_host' => 'localhost', // Hostname or IP acceptable here
+	'db_port' => '3306', // Can be left undefined to use default port
 	'db_user' => 'username',
 	'db_pass' => 'password'
 ));
@@ -367,7 +370,7 @@ if ($vars->maintenanceMode) die('Sorry, under construction.');
 Auto-Loader Example
 -------------------
 
-The beauty of the auto-loader is that it will only load & parse PHP files that it needs. To use it, however, you must define an autoloader function. [Composer](http://getcomposer.org/) normally handels this, but if you are using this library without composer here is an exmaple autoloader that could be used, created by the [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md) Framework Interop Group:
+The beauty of the auto-loader is that it will only load & parse PHP files that it needs. To use it, however, you must define an autoloader function. [Composer](http://getcomposer.org/) normally handles this, but if you are using this library without composer here is an exmaple autoloader that could be used, created by the [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md) Framework Interop Group:
 
 ```php
 <?php

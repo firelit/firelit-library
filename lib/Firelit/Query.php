@@ -30,7 +30,8 @@ class Query {
 			$config = array(
 				'type' => 'mysql',
 				'db_name' => 'database',
-				'db_ip' => 'localhost',
+				'db_host' => 'localhost', // Can be hostname or IP address
+				'db_port' => '3306', // Can be left undefined to connect to default port
 				'db_user' => 'username',
 				'db_pass' => 'password'
 			);
@@ -63,7 +64,9 @@ class Query {
 				
 			} elseif (self::$config['type'] == 'mysql') {
 				
-				$dsn = 'mysql:dbname='. self::$config['db_name'] .';host='. self::$config['db_ip'];
+				$dsn = 'mysql:dbname='. self::$config['db_name'] .';host='. self::$config['db_host'];
+				if (strlen(self::$config['db_port'])) $dsn .= ';port='. self::$config['db_port'];
+				
 				self::$conn = new \PDO($dsn, self::$config['db_user'], self::$config['db_pass'], array( \PDO::MYSQL_ATTR_INIT_COMMAND => 'set names utf8mb4' ));
 				
 			} else {
