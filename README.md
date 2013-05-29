@@ -312,7 +312,33 @@ Available methods for getting the status and/or results of a query:
 
 ### ServerRequest
 
-A class that captures the incoming HTTP request in a single object and performs any necessary preliminary work. Provides a nice class wrapper around all the important, sanitized parameters within the request.
+A class that captures the incoming HTTP request in a single object and performs any necessary preliminary work. Provides a nice class wrapper around all the important parameters within the request and allows for easy sanitization.
+
+Example usage:
+```php
+<?php
+
+$req = new Firelit\ServerRequest( function(&$val) {
+	
+	// Remove any invalid UTF-8 characters from $_POST, $_GET and $_COOKIE
+	Firelit\Strings::cleanUTF8($val); 
+	
+});
+
+// Filtered $_POST, $_GET and $_COOKIE parameters can then be accessed via the object
+if ($req->get['page'] == '2') showPageTwo();
+```
+
+Available properties:
+- `cli` will return true if the page was loaded from the command line interface
+- `cookie` will return all data (filtered, as specified) originally available via $_COOKIE
+- `get` will return all data (filtered, as specified) originally available via $_GET
+- `host' is set to the host as secified in the HTTP request
+- `method` is set to the HTTP request method (eg, 'POST', 'PUT', etc.)
+- `path` is set to the requested path (eg, '/folder/test.php')
+- `post` will return all data (filtered, as specified) originally available via $_POST
+- `referer` will return the HTTP referer as specified by the client
+- `secure` will return true if the connection is secure (ie, 'HTTPS://')
 
 ### ServerResponse
 
