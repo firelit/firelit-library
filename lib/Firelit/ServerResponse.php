@@ -4,8 +4,11 @@ namespace Firelit;
 
 class ServerResponse extends InitExtendable {
 	
-	private $outputBuffering = true;
-	private $charset;
+	protected $code = 200;
+	protected $outputBuffering = true;
+	protected $charset;
+	
+	static public $exceptOnHeaders = false;
 	
 	public function __construct($ob = true, $charset = "UTF-8") { 
 		// $ob: Turn output buffering on?
@@ -14,7 +17,10 @@ class ServerResponse extends InitExtendable {
 		$this->charset = $charset;
 		
 		// UTF-8 output by default
-		mb_http_output($this->charset);
+		if (!headers_sent())
+			mb_http_output($this->charset);
+		elseif (self::$exceptOnHeaders)
+			throw new \Exception('Headers already sent. Multi-byte output cannot be enabled.');
 		
 		if ($ob) {
 			// Ouput buffer by default to prevent unforseen errors from printing to the page,
@@ -31,6 +37,14 @@ class ServerResponse extends InitExtendable {
 	}
 	
 	public function contentType($type = false) {
+			
+		if (headers_sent()) {
+			
+			if (self::$exceptOnHeaders)
+				throw new \Exception('Headers already sent. Content-type cannot be changed.');
+			else return;
+				
+		}
 		
 		if (!$type) $type = "text/html";
 		
@@ -40,6 +54,15 @@ class ServerResponse extends InitExtendable {
 	
 	public function code($code) {
 		
+		if (headers_sent()) {
+		
+			if (self::$exceptOnHeaders && (http_response_code() != $code))
+				throw new \Exception('Headers already sent. HTTP response code cannot be changed.');
+			else return;
+				
+		}
+		
+		$this->code = $code;
 		http_response_code($code);
 		
 	}
@@ -50,7 +73,15 @@ class ServerResponse extends InitExtendable {
 		// 302 = Temporary redirect
 		// 303 = Perform GET at new location (instead of POST)
 		
-		$this->code($code);
+		if (headers_sent()) {
+			
+			if (self::$exceptOnHeaders)
+				throw new \Exception('Headers already sent. Redirect cannot be initiated.');
+			else return;
+				
+		}
+		
+		$this->code($type);
 		header('Location: '. $path);
 		
 		if ($this->outputBuffering)

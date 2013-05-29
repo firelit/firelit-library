@@ -4,7 +4,6 @@ namespace Firelit;
 
 abstract class ApiResponse extends ServerResponse {
 	
-	protected $code = 200;
 	protected $response = array();
 	protected $responseSent = false;
 	
@@ -33,8 +32,6 @@ abstract class ApiResponse extends ServerResponse {
 		if ($this->responseSent) 
 			if ($end) exit;
 			else return;
-		
-		http_response_code($this->code);
 		
 		if ($this->code == 204)
 			if ($end) exit;
