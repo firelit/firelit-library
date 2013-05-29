@@ -8,7 +8,7 @@ class ServerRequest {
 	private $host, $path, $method, $secure, $referer, $cli;
 	private $post, $get, $cookie;
 
-	public function __construct() { 
+	public function __construct($filterAndUnset = true) { 
 		
 		$this->method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : false;
 		$this->path = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : false;
@@ -21,13 +21,23 @@ class ServerRequest {
 		$this->get = $_GET;
 		$this->cookie = $_COOKIE;
 		
+		if ($filterAndUnset) {
+			// Filter local copies of POST, GET & COOKIE data
+			// Unset global versions to prevent access to un-filtered
+			$this->filterInputs();
+			
+			unset($_POST);
+			unset($_GET);
+			unset($_COOKIE);
+			
+		}
 	}
 	
-	public function filterInputs() {
+	public function filterInputs($cleaner = 'Strings::cleanUTF8') {
 		
-		Strings::cleanUTF8($this->post);
-		Strings::cleanUTF8($this->get);
-		Strings::cleanUTF8($this->cookie);
+		$cleaner($this->post);
+		$cleaner($this->get);
+		$cleaner($this->cookie);
 	
 	}
 	
