@@ -21,7 +21,7 @@ class ApiResponseXML extends ApiResponse {
 		
 		parent::respond($response, $end);
 		
-		$xml = new SimpleXMLElement('<response/>', 0, false, $this->xmlNameSpace);
+		$xml = new \SimpleXMLElement('<response/>', 0, false, $this->xmlNameSpace);
 		
 		foreach ($this->response as $thisName => $thisVal) {
 			$this->arrayToXML($xml, $thisName, $thisVal);
