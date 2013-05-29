@@ -8,7 +8,7 @@ class ServerRequest {
 	private $host, $path, $method, $secure, $referer, $cli;
 	private $post, $get, $cookie;
 
-	public function __construct($filterAndUnset = true) { 
+	public function __construct($filter = false) { 
 		
 		$this->method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : false;
 		$this->path = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : false;
@@ -21,24 +21,38 @@ class ServerRequest {
 		$this->get = $_GET;
 		$this->cookie = $_COOKIE;
 		
-		if ($filterAndUnset) {
+		if ($filter) {
 			// Filter local copies of POST, GET & COOKIE data
 			// Unset global versions to prevent access to un-filtered
-			$this->filterInputs();
+			$this->filterInputs($filter);
 			
-			unset($_POST);
-			unset($_GET);
-			unset($_COOKIE);
+			$_POST = null;
+			$_GET = null;
+			$_COOKIE = null;
 			
 		}
 	}
 	
-	public function filterInputs($cleaner = 'Strings::cleanUTF8') {
+	public function filterInputs($filter = false) {
 		
-		$cleaner($this->post);
-		$cleaner($this->get);
-		$cleaner($this->cookie);
+		if ($filter == false) return;
+		if (!is_callable($filter)) 
+			throw new \Exception('Specified filter is not callable.');
+		
+		$this->recurse($this->post, $filter);
+		$this->recurse($this->get, $filter);
+		$this->recurse($this->cookie, $filter);
 	
+	}
+	
+	protected function recurse(&$input, &$function) {
+	
+		if (is_array($input))
+			foreach ($input as $name => &$value)
+				$this->recurse($value, $function);
+		else
+			$function($input);
+			
 	}
 	
 	public function __get($name) {
