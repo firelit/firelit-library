@@ -21,9 +21,13 @@ class CheckHTTPS {
 				$preRedirectFunction();
 			}
 			
-			if (headers_sent()) self::error();
-			
 			$newurl = "https://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
+			
+			if (headers_sent()) {
+				self::error(400, function() {
+					echo ' This page must be accessed securely: <a href="'. html_entities($newurl) .'">Click Here</a>';
+				});
+			}
 			
 			header('HTTP/1.1 301 Moved Permanently');
 			header('Location: '. $newurl);
@@ -34,18 +38,18 @@ class CheckHTTPS {
 		
 	}
 	
-	static public function error($errorCode = 400, $body = false, $preExitFunction = false) {
+	static public function error($errorCode = 400, $preExitFunction = false) {
 		
 		if (!self::isSecure()) {
+			
+			http_response_code($errorCode);
 			
 			if (is_callable($preExitFunction)) {
 				// Pass a closure to do work (eg, log the redirect)
 				$preExitFunction();
 			}
 			
-			if (!$body) $body = 'HTTPS required.';
-			
-			EndWithError::now($errorCode, $body);
+			exit;
 			
 		}
 		
