@@ -7,8 +7,6 @@ class ServerResponse extends InitExtendable {
 	private $outputBuffering = true;
 	private $charset;
 	
-	public $handler;
-	
 	public function __construct($ob = true, $charset = "UTF-8") { 
 		// $ob: Turn output buffering on?
 		// $charset: Specify the charset?
