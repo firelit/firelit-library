@@ -333,7 +333,7 @@ Available properties:
 - `cli` will return true if the page was loaded from the command line interface
 - `cookie` will return all data (filtered, as specified) originally available via $_COOKIE
 - `get` will return all data (filtered, as specified) originally available via $_GET
-- `host' is set to the host as secified in the HTTP request
+- `host` is set to the host as secified in the HTTP request
 - `method` is set to the HTTP request method (eg, 'POST', 'PUT', etc.)
 - `path` is set to the requested path (eg, '/folder/test.php')
 - `post` will return all data (filtered, as specified) originally available via $_POST
