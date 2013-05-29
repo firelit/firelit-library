@@ -7,6 +7,8 @@ class CheckHTTPS {
 	
 	static public function isSecure() {
 		
+		if (!isset($_SERVER['HTTPS'])) return false;
+		
 		return ($_SERVER["HTTPS"] == "on");
 		
 	}
@@ -21,12 +23,11 @@ class CheckHTTPS {
 				$preRedirectFunction();
 			}
 			
-			$newurl = "https://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
+			$newurl = self::getSecureURL();
 			
 			if (headers_sent()) {
-				self::error(400, function() {
-					echo ' This page must be accessed securely: <a href="'. html_entities($newurl) .'">Click Here</a>';
-				});
+				echo ' This page must be accessed securely: <a href="'. html_entities($newurl) .'">Click Here</a>';
+				exit;
 			}
 			
 			header('HTTP/1.1 301 Moved Permanently');
@@ -42,7 +43,8 @@ class CheckHTTPS {
 		
 		if (!self::isSecure()) {
 			
-			http_response_code($errorCode);
+			if (!headers_sent())
+				http_response_code($errorCode);
 			
 			if (is_callable($preExitFunction)) {
 				// Pass a closure to do work (eg, log the redirect)
@@ -53,6 +55,12 @@ class CheckHTTPS {
 			
 		}
 		
+	}
+	
+	static public function getSecureURL() {
+		
+		return "https://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
+	
 	}
 	
 }
