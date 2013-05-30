@@ -8,7 +8,7 @@ class QueryTest extends PHPUnit_Framework_TestCase {
 	
 		Firelit\Query::config(array(
 			'type' => 'other',
-			'dsn' => 'sqlite::memory'
+			'dsn' => 'sqlite::memory:'
 		));
 		
 	}
