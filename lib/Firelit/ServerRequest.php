@@ -5,7 +5,7 @@ namespace Firelit;
 class ServerRequest {
 	
 	// All properties accessible via magic getter method
-	private $host, $path, $method, $secure, $referer, $cli;
+	private $host, $path, $method, $secure, $referer, $cli, $headers;
 	private $post, $get, $cookie;
 
 	public function __construct($filter = false) { 
@@ -16,6 +16,8 @@ class ServerRequest {
 		$this->host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : false;
 		$this->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : false;
 		$this->cli = (php_sapi_name() == 'cli');
+		
+		$this->headers = apache_request_headers();
 		
 		$this->post = $_POST;
 		$this->get = $_GET;

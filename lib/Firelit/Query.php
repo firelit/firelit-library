@@ -15,10 +15,12 @@ class Query {
 	private $res = false;
 	private $sql;
 	
-	public function __construct() {
+	public function __construct($query = false) {
 		// Connect to the database
 		
 		if (!self::$conn) $this->connect();
+		
+		if ($query) $this->query($query);
 		
 	}	
 	
