@@ -268,7 +268,7 @@ Firelit\Query::config(array(
 // Or specify the DSN string for PDO to connect to other types of databases
 Firelit\Query::config(array(
 	'type' => 'other',
-	'dsn' => 'sqlite::memory'
+	'dsn' => 'sqlite::memory:'
 ));
 
 $q = new Firelit\Query();

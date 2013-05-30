@@ -40,7 +40,7 @@ class Query {
 			
 			$config = array(
 				'type' => 'other',
-				'dsn' => 'sqlite::memory'
+				'dsn' => 'sqlite::memory:'
 			);
 		*/
 		
