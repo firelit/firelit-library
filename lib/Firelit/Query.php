@@ -269,12 +269,12 @@ class Query {
 	}
 	
 	public function getError() {
-		$e = $this->sql->errorInfo();
+		$e = self::$conn->errorInfo();
 		return $e[2]; // Driver specific error message.
 	}
 	
 	public function getErrorCode() {
-		$e = $this->sql->errorInfo();
+		$e = self::$conn->errorInfo();
 		return $e[1]; // Driver specific error code.
 	}
 	
