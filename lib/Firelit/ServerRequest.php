@@ -22,30 +22,35 @@ class ServerRequest {
 		$this->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : false;
 		$this->cli = (php_sapi_name() == 'cli');
 		
-		$this->headers = apache_request_headers();
-		
-		if (self::$loadBalanced) {
+		if (is_callable('apache_request_headers')) {
 			
-			if (isset($this->headers['X-Forwarded-For'])) {
+			$this->headers = apache_request_headers();
+			
+			if (self::$loadBalanced) {
+				
+				if (isset($this->headers['X-Forwarded-For'])) {
+					$ips = $this->headers['X-Forwarded-For'];
+					$ips = explode(', ', $ips);
+					$this->ip = array_shift($ips);
+					
+					$this->proxies = $ips;
+				}
+				
+				if (isset($this->headers['X-Forwarded-Proto'])) {
+					$this->secure = ($this->headers['X-Forwarded-Proto'] == 'HTTPS');
+				}
+				
+			} elseif (isset($this->headers['X-Forwarded-For'])) {
+				
 				$ips = $this->headers['X-Forwarded-For'];
 				$ips = explode(', ', $ips);
-				$this->ip = array_shift($ips);
-				
 				$this->proxies = $ips;
+				
 			}
-			
-			if (isset($this->headers['X-Forwarded-Proto'])) {
-				$this->secure = ($this->headers['X-Forwarded-Proto'] == 'HTTPS');
-			}
-			
-		} elseif (isset($this->headers['X-Forwarded-For'])) {
-			
-			$ips = $this->headers['X-Forwarded-For'];
-			$ips = explode(', ', $ips);
-			$this->proxies = $ips;
-			
-		}
 		
+		} else
+			$this->headers = array();
+			
 		$this->post = $_POST;
 		$this->get = $_GET;
 		$this->cookie = $_COOKIE;
