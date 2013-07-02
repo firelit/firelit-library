@@ -11,7 +11,7 @@ class ServerRequest {
 	public static $loadBalanced = false;
 
 	// $filter should be a filtering function, if supplied, which filters a string value by reference
-	public function __construct($filter = false) { 
+	public function __construct($filter = false, $bodyFormat = 'querystring') { 
 		
 		$this->ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false;
 		$this->proxies = array();
@@ -51,7 +51,13 @@ class ServerRequest {
 		} else
 			$this->headers = array();
 			
-		$this->post = $_POST;
+		if ($bodyFormat == 'json') {
+			$this->post = stream_get_contents(STDIN);
+			$this->post = json_decode($this->post, true);
+		} else {
+			$this->post = $_POST;
+		}
+
 		$this->get = $_GET;
 		$this->cookie = $_COOKIE;
 		
