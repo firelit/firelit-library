@@ -52,8 +52,13 @@ class ServerRequest {
 			$this->headers = array();
 			
 		if ($bodyFormat == 'json') {
-			$this->post = stream_get_contents(STDIN);
+			
+			$stream = fopen(STDIN);
+			$this->post = stream_get_contents($stream);
+			fclose($stream);
+
 			$this->post = json_decode($this->post, true);
+
 		} else {
 			$this->post = $_POST;
 		}
