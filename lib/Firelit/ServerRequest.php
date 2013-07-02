@@ -53,7 +53,7 @@ class ServerRequest {
 			
 		if ($bodyFormat == 'json') {
 			
-			$stream = fopen(STDIN, 'r');
+			$stream = fopen('php://stdin', 'r');
 			$this->post = stream_get_contents($stream);
 			fclose($stream);
 
