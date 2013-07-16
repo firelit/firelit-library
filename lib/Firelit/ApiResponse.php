@@ -39,7 +39,7 @@ abstract class ApiResponse extends ServerResponse {
 		
 	}
 
-	abstract public function respond($response = array(), $end = false) { }
+	abstract public function respond($response = array(), $end = false);
 	
 	public function setCallback($function) {
 		// $function should be a closure that can be called on destruct
