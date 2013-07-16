@@ -7,6 +7,8 @@ abstract class ApiResponse extends ServerResponse {
 	protected $response = array();
 	protected $responseSent = false;
 	
+	protected $callback = false;
+
 	static $responseType = false;
 	static $responseObject;
 	
@@ -39,11 +41,19 @@ abstract class ApiResponse extends ServerResponse {
 
 	abstract public function respond($response = array(), $end = false) { }
 	
+	public function setCallback($function) {
+		// $function should be a closure that can be called on destruct
+		// It should take one parameter, the HTTP response code
+		$this->callback = $function;
+	}
+
 	public function mute() {
 		$this->responseSent = true;
 	}
 	
 	public function __destruct() {
+		if (is_callable($this->callback)) $this->callback($this->code);
+
 		if ($this->responseSent) return;
 		
 		$this->respond();
