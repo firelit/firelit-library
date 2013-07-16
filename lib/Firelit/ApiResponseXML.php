@@ -19,7 +19,9 @@ class ApiResponseXML extends ApiResponse {
 	
 	public function respond($response = array(), $end = false) {
 		
-		parent::respond($response, $end);
+		$this->set($response);
+
+		if ($this->responseComplete()) exit;
 		
 		$xml = new \SimpleXMLElement('<response/>', 0, false, $this->xmlNameSpace);
 		

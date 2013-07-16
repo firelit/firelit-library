@@ -17,8 +17,10 @@ class ApiResponseJSON extends ApiResponse {
 	
 	public function respond($response = array(), $end = false) {
 		
-		parent::respond($response, $end);
-	
+		$this->set($response);
+
+		if ($this->responseComplete()) exit;
+		
 		if ($this->jsonCallback) echo $this->jsonCallback .'(';
 		
 		echo json_encode($this->response);

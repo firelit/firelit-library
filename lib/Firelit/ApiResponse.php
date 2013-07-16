@@ -27,19 +27,17 @@ abstract class ApiResponse extends ServerResponse {
 		exit;	
 	}
 	
-	public function respond($response = array(), $end = false) {
+	public function responseComplete() {
 		
-		if ($this->responseSent) 
-			if ($end) exit;
-			else return;
+		if ($this->responseSent) return true;
 		
-		if ($this->code == 204)
-			if ($end) exit;
-			else return;
+		if ($this->code == 204) return true;
 			
-		$this->set($response);
+		return false;
 		
 	}
+
+	abstract public function respond($response = array(), $end = false) { }
 	
 	public function mute() {
 		$this->responseSent = true;
