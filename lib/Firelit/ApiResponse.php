@@ -52,11 +52,16 @@ abstract class ApiResponse extends ServerResponse {
 	}
 	
 	public function __destruct() {
-		if (is_callable($this->callback)) $this->callback($this->code);
+
+		if (is_callable($this->callback)) {
+			$callback = $this->callback;
+			$callback($this->code);
+		}
 
 		if ($this->responseSent) return;
 		
 		$this->respond();
+		
 	}
 	
 }
