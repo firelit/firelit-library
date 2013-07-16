@@ -11,7 +11,7 @@ class ApiResponseJSON extends ApiResponse {
 		$this->contentType('application/json');
 	}
 	
-	public function setCallback($callback = false) {
+	public function setJsonCallback($callback = false) {
 		$this->jsonCallback = $callback;
 	}
 	
