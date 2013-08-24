@@ -44,7 +44,7 @@ class LogEntry {
 	}
 	
 	static function config($config) {
-		$this->config = array_merge($config, $this->config);
+		$this->config = array_merge_recursive($this->config, $config);
 	}
 	
 	public function now($level, $entry, $file = false, $line = 0, $user = false) {
